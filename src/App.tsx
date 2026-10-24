@@ -33,7 +33,7 @@ function themeStyle(theme: PathTheme): React.CSSProperties {
 function Brand() {
   return (
     <h1 className="brand">
-      <span className="brand-mark"><Icon name="target" size={18} /></span>
+      <img className="brand-mark" src={`${import.meta.env.BASE_URL}favicon.svg`} alt="" width={32} height={32} />
       Goal Prep Planner
     </h1>
   );
