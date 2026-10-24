@@ -1,0 +1,91 @@
+name: Build Android app
+
+# Every push to main publishes a new APK on the Releases page, so this link
+# always points at the newest one:
+# https://github.com/madhubolla2205/goal-prep-planner/releases/latest/download/goal-prep-planner.apk
+# Pull requests only build it, to check that it still builds.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    env:
+      VERSION_CODE: ${{ github.run_number }}
+      VERSION_NAME: 1.0.${{ github.run_number }}
+      HAS_KEY: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+      - run: npm ci
+      - run: npm test
+      # The app is served from the root inside the APK, so no BASE_PATH here.
+      - run: npm run build
+      - run: npx cap sync android
+
+      # With the signing key saved as repository secrets, every release is
+      # signed the same way and installs as an update over the last one.
+      # Without it the APK gets a throwaway debug key, so people would have to
+      # uninstall the old version (losing its data) before installing a new one.
+      - name: Build signed APK
+        if: ${{ env.HAS_KEY == 'true' }}
+        env:
+          KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: upload
+        working-directory: android
+        run: |
+          echo "$KEYSTORE" | base64 --decode > "$RUNNER_TEMP/release.jks"
+          ANDROID_KEYSTORE_FILE="$RUNNER_TEMP/release.jks" ./gradlew assembleRelease
+          cp app/build/outputs/apk/release/app-release.apk "$RUNNER_TEMP/goal-prep-planner.apk"
+      - name: Build debug-signed APK
+        if: ${{ env.HAS_KEY != 'true' }}
+        working-directory: android
+        run: |
+          echo "::warning::No signing key in the repository secrets, so this APK won't install as an update over an earlier one."
+          ./gradlew assembleDebug
+          cp app/build/outputs/apk/debug/app-debug.apk "$RUNNER_TEMP/goal-prep-planner.apk"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: goal-prep-planner-apk
+          path: ${{ runner.temp }}/goal-prep-planner.apk
+
+      - name: Publish release
+        if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cat > "$RUNNER_TEMP/notes.md" <<'NOTES'
+          **Install on Android**
+
+          1. On your phone, download `goal-prep-planner.apk` below.
+          2. Open it. If Android asks, allow your browser or Files app to "install unknown apps".
+          3. Tap **Install**, then open **Goal Prep Planner** from your home screen.
+
+          To update later, download the newest APK the same way and install it over this one. Your plans stay.
+          NOTES
+          gh release create "android-v$VERSION_NAME" "$RUNNER_TEMP/goal-prep-planner.apk" \
+            --target "$GITHUB_SHA" \
+            --title "Android app $VERSION_NAME" \
+            --notes-file "$RUNNER_TEMP/notes.md" \
+            --latest
