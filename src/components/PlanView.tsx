@@ -3,7 +3,8 @@ import { formatDay, type ISODate } from '../lib/dates';
 import { buildPlan, schedule } from '../lib/planner';
 import { HORIZON_LABEL, LEVEL_LABEL, STRATEGIES } from '../lib/strategy';
 import type { Goal } from '../lib/types';
-import { KIND_LABEL, blockName, formatMinutes } from './labels';
+import { Icon } from './Icon';
+import { KIND_ICON, KIND_LABEL, blockName, formatMinutes } from './labels';
 
 const PAGE = 14;
 
@@ -24,7 +25,10 @@ export function PlanView({ goal, today }: { goal: Goal; today: ISODate }) {
         The plan updates every day from what you actually log.
       </p>
       <div className="card strategy-card">
-        <h3>How this plan works</h3>
+        <h3 className="with-icon">
+          <span className="icon-badge"><Icon name="spark" size={16} /></span>
+          How this plan works
+        </h3>
         <p className="strategy-summary muted">
           {HORIZON_LABEL[sched.profile.horizon]} plan for {goal.type === 'exam' ? 'an exam' : 'an interview'}, starting level:{' '}
           {LEVEL_LABEL[sched.profile.level]}. {mocksLeft} {goal.type === 'exam' ? 'mock tests' : 'mock interviews'} to go, each followed by an
@@ -45,17 +49,17 @@ export function PlanView({ goal, today }: { goal: Goal; today: ISODate }) {
       <div className="card">
         <ol className="plan-list">
           {plan.slice(0, shown).map((d) => (
-            <li key={d.date} className={d.date === today ? 'is-today' : ''}>
+            <li key={d.date} className={`${d.date === today ? 'is-today' : ''} phase-${d.phase}`}>
               <div className="plan-date">
                 <strong>{d.date === today ? 'Today' : formatDay(d.date)}</strong>
                 {d.phase === 'revise' && <span className="chip small">Revision</span>}
               </div>
               <ul className="plan-blocks">
                 {d.blocks.map((b) => (
-                  <li key={`${b.kind}-${b.skillId}`}>
-                    <span className={`kind kind-${b.kind}`}>{KIND_LABEL[b.kind]}</span>
-                    {blockName(goal, b)}
-                    <span className="muted"> · {formatMinutes(b.minutes)}</span>
+                  <li key={`${b.kind}-${b.skillId}`} className={`plan-block task-${b.kind}`}>
+                    <span className="plan-block-icon" title={KIND_LABEL[b.kind]}><Icon name={KIND_ICON[b.kind]} size={14} /><span className="sr-only">{KIND_LABEL[b.kind]}:</span></span>
+                    <span className="plan-block-name">{blockName(goal, b)}</span>
+                    <span className="muted small">{formatMinutes(b.minutes)}</span>
                   </li>
                 ))}
                 {d.blocks.length === 0 && <li className="muted">Nothing planned</li>}

@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { minutesLogged } from '../lib/planner';
 import { newId } from '../lib/storage';
+import { THEMES, THEME_ORDER, detectTheme } from '../lib/themes';
 import type { Goal, Skill } from '../lib/types';
+import { Icon } from './Icon';
 import { formatMinutes } from './labels';
 
 interface Props {
@@ -84,6 +86,28 @@ export function SkillsView({ goal, onChange, onDelete }: Props) {
             <input type="number" min={0.25} step={0.25} value={goal.dailyMinutes / 60} onChange={(e) => onChange({ ...goal, dailyMinutes: Math.max(15, Math.round(Number(e.target.value) * 60)) })} />
           </label>
         </div>
+        <fieldset className="theme-picker">
+          <legend>Path theme</legend>
+          <div className="theme-grid">
+            {[null, ...THEME_ORDER].map((id) => {
+              const t = THEMES[id ?? detectTheme(goal)];
+              const on = (goal.theme ?? null) === id;
+              return (
+                <button
+                  type="button"
+                  key={id ?? 'auto'}
+                  className={`theme-swatch ${on ? 'on' : ''}`}
+                  aria-pressed={on}
+                  style={{ ['--t1' as string]: t.from, ['--t2' as string]: t.to }}
+                  onClick={() => onChange({ ...goal, theme: id ?? undefined })}
+                >
+                  <span className="swatch-chip"><Icon name={t.icon} size={16} /></span>
+                  {id ? t.label : `Auto (${t.label})`}
+                </button>
+              );
+            })}
+          </div>
+        </fieldset>
         <button className="link danger" onClick={onDelete}>Delete this goal</button>
       </div>
     </div>
