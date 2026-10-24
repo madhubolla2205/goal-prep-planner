@@ -45,7 +45,7 @@ GitHub Pages: every push to `main` builds the app and publishes it to https://ma
 
 ## Usage numbers
 
-Both counters are free. The badge at the top counts downloads of every APK on the Releases page (people who download but never install are counted too). Visitors to the site are counted by [GoatCounter](https://www.goatcounter.com/), which sets no cookies and stores no personal data. It is on only when the repository variable `GOATCOUNTER_CODE` holds the site code (Settings → Secrets and variables → Actions → Variables); the counter's dashboard is at `https://<code>.goatcounter.com`. Local builds and the Android app are not counted.
+Both counters are free. The badge at the top counts downloads of every APK on the Releases page (people who download but never install are counted too). Visitors to the site are counted by [GoatCounter](https://www.goatcounter.com/), which sets no cookies and stores no personal data. Visitor numbers are at https://goal-prep-planner.goatcounter.com (the site code is set in `.github/workflows/deploy-pages.yml`; a repository variable `GOATCOUNTER_CODE` overrides it). Local builds and the Android app are not counted.
 
 ## Next steps
 
