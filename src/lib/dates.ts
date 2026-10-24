@@ -1,3 +1,5 @@
+import { locale } from './i18n';
+
 // Dates are stored as local calendar days in ISO form (YYYY-MM-DD).
 // Arithmetic goes through UTC so daylight-saving shifts never skip a day.
 
@@ -39,7 +41,7 @@ export function weekday(iso: ISODate): number {
 }
 
 export function formatDay(iso: ISODate): string {
-  return new Date(toUTC(iso)).toLocaleDateString(undefined, {
+  return new Date(toUTC(iso)).toLocaleDateString(locale(), {
     weekday: 'short',
     month: 'short',
     day: 'numeric',

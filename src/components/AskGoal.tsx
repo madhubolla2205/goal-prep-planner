@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { requestDraft } from '../lib/aiPlan';
 import type { ISODate } from '../lib/dates';
 import { goalFromDraft } from '../lib/goalText';
+import { t } from '../lib/i18n';
+import { STARTERS, type Starter } from '../lib/starters';
 import { THEMES, THEME_ORDER } from '../lib/themes';
 import type { AppState } from '../lib/storage';
 import type { Goal } from '../lib/types';
@@ -19,12 +21,14 @@ interface Props {
   today: ISODate;
   onCreate: (goal: Goal) => void;
   onManual: () => void;
+  /** Opens a ready-made plan to adjust and add. */
+  onStarter: (starter: Starter) => void;
   onCancel?: () => void;
   /** Offered on a fresh device, to pick up a plan from a backup file. */
   restore?: { state: AppState; onRestore: (next: AppState) => void };
 }
 
-export function AskGoal({ today, onCreate, onManual, onCancel, restore }: Props) {
+export function AskGoal({ today, onCreate, onManual, onStarter, onCancel, restore }: Props) {
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -47,10 +51,10 @@ export function AskGoal({ today, onCreate, onManual, onCancel, restore }: Props)
           </span>
         ))}
       </div>
-      <h2 className="ask-title">What are you <span className="grad-text">preparing for?</span></h2>
-      <p className="muted">Say it the way you'd tell a friend: the exam or interview, when it is, and how much time you have each day.</p>
+      <h2 className="ask-title">{t('askTitleA')} <span className="grad-text">{t('askTitleB')}</span></h2>
+      <p className="muted">{t('askHint')}</p>
       <textarea
-        aria-label="What are you preparing for?"
+        aria-label={`${t('askTitleA')} ${t('askTitleB')}`}
         value={text}
         onChange={(e) => setText(e.target.value)}
         onKeyDown={(e) => {
@@ -59,7 +63,7 @@ export function AskGoal({ today, onCreate, onManual, onCancel, restore }: Props)
             e.currentTarget.form?.requestSubmit();
           }
         }}
-        placeholder="e.g. Amazon SDE interview in 6 weeks, 2 hours a day"
+        placeholder={t('askPlaceholder')}
         rows={3}
         maxLength={1000}
         disabled={busy}
@@ -73,17 +77,27 @@ export function AskGoal({ today, onCreate, onManual, onCancel, restore }: Props)
         ))}
       </div>
       <div className="actions">
-        {onCancel && <button type="button" className="ghost" onClick={onCancel} disabled={busy}>Cancel</button>}
+        {onCancel && <button type="button" className="ghost" onClick={onCancel} disabled={busy}>{t('cancel')}</button>}
         <button type="submit" className="cta" disabled={!text.trim() || busy}>
-          <Icon name="spark" size={16} /> {busy ? 'Building your plan…' : 'Make my plan'}
+          <Icon name="spark" size={16} /> {busy ? t('buildingPlan') : t('makeMyPlan')}
         </button>
       </div>
       <button type="button" className="link small manual-link" onClick={onManual} disabled={busy}>
-        Prefer to set everything up yourself?
+        {t('manualSetup')}
       </button>
+      <section className="starters" aria-labelledby="starters-title">
+        <h3 id="starters-title" className="home-section">{t('popularPlans')}</h3>
+        <div className="starter-grid">
+          {STARTERS.map((s) => (
+            <button type="button" key={s.id} className="pill starter" disabled={busy} onClick={() => onStarter(s)}>
+              <Icon name={s.type === 'interview' ? 'briefcase' : 'book'} size={14} /> {s.name}
+            </button>
+          ))}
+        </div>
+      </section>
       {restore && (
         <div className="restore-link">
-          <RestoreButton {...restore} className="link small" label="Have a backup from another device? Restore it" />
+          <RestoreButton {...restore} className="link small" label={t('restoreBackup')} />
         </div>
       )}
     </form>

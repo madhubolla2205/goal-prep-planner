@@ -2,6 +2,7 @@ import react from '@vitejs/plugin-react'
 import { createHash } from 'node:crypto'
 import { readFileSync, readdirSync } from 'node:fs'
 import { defineConfig, type Plugin } from 'vite'
+import { seoPages } from './seo-pages'
 
 /**
  * Emits sw.js with the list of every file in the build, so the whole app is
@@ -14,7 +15,8 @@ function serviceWorker(): Plugin {
     apply: 'build',
     generateBundle(_, bundle) {
       const publicFiles = readdirSync('public')
-      const files = [...Object.keys(bundle), ...publicFiles].filter((f) => !f.endsWith('.map')).sort()
+      // The plan pages and sitemap are for search engines, not the offline app.
+      const files = [...Object.keys(bundle), ...publicFiles].filter((f) => !f.endsWith('.map') && !f.startsWith('plans/') && f !== 'sitemap.xml').sort()
       const hash = createHash('sha256')
       for (const f of files) hash.update(f)
       for (const f of publicFiles) hash.update(readFileSync(`public/${f}`))
@@ -51,7 +53,8 @@ export default defineConfig({
   // GitHub Pages serves the app from /goal-prep-planner/; the deploy workflow
   // sets BASE_PATH. Local dev and `npm start` keep serving from the root.
   base: process.env.BASE_PATH ?? '/',
-  plugins: [react(), serviceWorker(), visitorCounter()],
+  // The plan pages come before the service worker so it can leave them out of its list.
+  plugins: [react(), seoPages(process.env.SITE_URL), serviceWorker(), visitorCounter()],
   server: {
     // `npm run server` runs the API alongside the dev server.
     proxy: { '/api': 'http://localhost:8787' },

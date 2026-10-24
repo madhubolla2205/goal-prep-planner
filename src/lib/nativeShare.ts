@@ -16,3 +16,24 @@ export async function shareTextFile(name: string, text: string, title: string): 
     return false;
   }
 }
+
+/** Same as shareTextFile, for a binary file such as a picture, given as base64. */
+export async function shareBase64File(name: string, base64: string, title: string): Promise<boolean> {
+  const { uri } = await Filesystem.writeFile({ path: name, data: base64, directory: Directory.Cache });
+  try {
+    await Share.share({ title, files: [uri] });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Opens Android's share sheet for a message with a link. */
+export async function shareLink(title: string, text: string, url: string): Promise<boolean> {
+  try {
+    await Share.share({ title, text, url });
+    return true;
+  } catch {
+    return false;
+  }
+}

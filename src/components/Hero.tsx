@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { daysBetween, formatDay, type ISODate } from '../lib/dates';
+import { t } from '../lib/i18n';
 import { buildPlan, minutesOnDay, overallReadiness, schedule, streak } from '../lib/planner';
 import type { PathTheme } from '../lib/themes';
 import type { Goal } from '../lib/types';
@@ -38,10 +39,10 @@ export function Hero({ goal, theme, today }: Props) {
       </div>
 
       <div className="hero-stats">
-        <Stat icon="target" value={`${overallReadiness(goal)}%`} label="Ready" />
-        <Stat icon="flame" value={String(days)} label="Day streak" />
-        <Stat icon="sun" value={day ? `${Math.round(todayShare * 100)}%` : 'Rest'} label="Today" />
-        <Stat icon="timer" value={`${Math.round(goal.dailyMinutes / 6) / 10} h`} label="Per day" />
+        <Stat icon="target" value={`${overallReadiness(goal)}%`} label={t('heroReady')} />
+        <Stat icon="flame" value={String(days)} label={t('heroStreak')} />
+        <Stat icon="sun" value={day ? `${Math.round(todayShare * 100)}%` : t('heroRest')} label={t('heroToday')} />
+        <Stat icon="timer" value={`${Math.round(goal.dailyMinutes / 6) / 10} h`} label={t('heroPerDay')} />
       </div>
 
       <div className="journey" aria-label={`Journey from ${formatDay(goal.startDate)} to ${formatDay(goal.targetDate)}`}>
@@ -73,7 +74,7 @@ function Countdown({ daysLeft, elapsed }: { daysLeft: number; elapsed: number })
         <circle cx="50" cy="50" r={r} className="ring-fill" strokeDasharray={c} strokeDashoffset={c * (1 - elapsed)} />
       </svg>
       <div className="ring-text">
-        {daysLeft > 0 ? <><strong>{daysLeft}</strong><span>days to go</span></> : <strong className="ring-today">{daysLeft === 0 ? 'Today!' : 'Done'}</strong>}
+        {daysLeft > 0 ? <><strong>{daysLeft}</strong><span>{t('ringDaysToGo')}</span></> : <strong className="ring-today">{daysLeft === 0 ? t('targetToday') : t('ringDone')}</strong>}
       </div>
     </div>
   );

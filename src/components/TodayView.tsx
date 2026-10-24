@@ -2,10 +2,11 @@ import { useMemo, useState } from 'react';
 import { formatDay, type ISODate } from '../lib/dates';
 import { buildPlan, entryKind, minutesOnDay, schedule } from '../lib/planner';
 import { newId } from '../lib/storage';
+import { t } from '../lib/i18n';
 import { focusSessions } from '../lib/strategy';
 import type { BlockKind, Goal, PlannedBlock } from '../lib/types';
 import { Icon } from './Icon';
-import { KIND_ICON, KIND_LABEL, blockName, formatMinutes, kindHint, skillName } from './labels';
+import { KIND_ICON, kindLabel, blockName, formatMinutes, kindHint, skillName } from './labels';
 import { QuickRevision } from './QuickRevision';
 
 interface Props {
@@ -58,18 +59,18 @@ export function TodayView({ goal, today, onChange, onAdjust, onOpenNotes }: Prop
         <div className="card-head">
           <h3 className="with-icon">
             <span className="icon-badge"><Icon name="sun" size={16} /></span>
-            Today's mission <span className="muted head-date">{formatDay(today)}</span>
+            {t('todaysMission')} <span className="muted head-date">{formatDay(today)}</span>
           </h3>
           {day && (
             <span className="muted small">
-              {formatMinutes(Math.min(loggedToday, planned))} of {formatMinutes(planned)} done
+              {t('doneOfPlanned', { done: formatMinutes(Math.min(loggedToday, planned)), planned: formatMinutes(planned) })}
             </span>
           )}
         </div>
         {day && <Progress value={planned ? Math.min(1, loggedToday / planned) : 0} />}
 
-        {!day && plan.length === 0 && <p className="empty">The target date has passed. Good luck, or set a new goal.</p>}
-        {!day && plan.length > 0 && <p className="empty">Rest day. Your next session is {formatDay(plan[0].date)}.</p>}
+        {!day && plan.length === 0 && <p className="empty">{t('targetPassedToday')}</p>}
+        {!day && plan.length > 0 && <p className="empty">{t('restDayNext', { date: formatDay(plan[0].date) })}</p>}
         {day && day.blocks.length === 0 && <p className="empty">Nothing planned. Add skills on the Skills tab to get a plan.</p>}
 
         {day && day.blocks.length > 0 && (
@@ -83,7 +84,7 @@ export function TodayView({ goal, today, onChange, onAdjust, onOpenNotes }: Prop
                   <span className="task-icon"><Icon name={KIND_ICON[b.kind]} size={20} /></span>
                   <div className="task-main">
                     <div className="task-title">
-                      <span className="kind">{KIND_LABEL[b.kind]}</span>
+                      <span className="kind">{kindLabel(b.kind)}</span>
                       <span className="task-name">{blockName(goal, b)}</span>
                     </div>
                     <span className="task-hint muted small">
@@ -98,7 +99,7 @@ export function TodayView({ goal, today, onChange, onAdjust, onOpenNotes }: Prop
                   <div className="task-actions">
                     <button className="ghost small" onClick={() => log(b.skillId, 15, b.kind)}>+15 min</button>
                     <button className="small done-btn" disabled={complete} onClick={() => log(b.skillId, b.minutes - done, b.kind)}>
-                      <Icon name="check" size={14} /> {complete ? 'Done' : 'Mark done'}
+                      <Icon name="check" size={14} /> {complete ? t('done') : t('markDone')}
                     </button>
                   </div>
                 </li>
@@ -111,7 +112,7 @@ export function TodayView({ goal, today, onChange, onAdjust, onOpenNotes }: Prop
       <div className="card">
         <h3 className="with-icon">
           <span className="icon-badge"><Icon name="timer" size={16} /></span>
-          Log other study time
+          {t('logOtherTime')}
         </h3>
         <form
           className="inline-form"
@@ -127,8 +128,8 @@ export function TodayView({ goal, today, onChange, onAdjust, onOpenNotes }: Prop
             <option value="mock">{skillName(goal, null)}</option>
           </select>
           <input aria-label="Minutes" type="number" min={5} step={5} value={extraMinutes} onChange={(e) => setExtraMinutes(Number(e.target.value))} />
-          <span className="muted">min</span>
-          <button type="submit">Log</button>
+          <span className="muted">{t('min')}</span>
+          <button type="submit">{t('log')}</button>
         </form>
 
         {todaysLog.length > 0 && (
@@ -137,10 +138,10 @@ export function TodayView({ goal, today, onChange, onAdjust, onOpenNotes }: Prop
               <li key={e.id}>
                 <span>
                   {blockName(goal, { skillId: e.skillId, minutes: e.minutes, kind: entryKind(e) })}
-                  {e.skillId !== null && entryKind(e) !== 'learn' && <span className="muted"> · {KIND_LABEL[entryKind(e)].toLowerCase()}</span>}
+                  {e.skillId !== null && entryKind(e) !== 'learn' && <span className="muted"> · {kindLabel(entryKind(e)).toLowerCase()}</span>}
                 </span>
                 <span className="muted">{formatMinutes(e.minutes)}</span>
-                <button className="link" onClick={() => undo(e.id)}>Undo</button>
+                <button className="link" onClick={() => undo(e.id)}>{t('undo')}</button>
               </li>
             ))}
           </ul>
