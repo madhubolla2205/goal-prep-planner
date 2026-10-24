@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { formatDay, type ISODate } from '../lib/dates';
 import { overallReadiness, pace, recentActivity, remainingMinutes, skillReadiness, streak } from '../lib/planner';
 import type { Goal } from '../lib/types';
+import { Icon } from './Icon';
 import { formatMinutes } from './labels';
 
 const PACE_LABEL = {
@@ -31,12 +32,12 @@ export function Dashboard({ goal, today }: { goal: Goal; today: ISODate }) {
     <div className="stack">
       <div className="tiles">
         <div className="tile">
-          <span className="tile-label">Readiness</span>
+          <span className="tile-label"><span className="icon-badge"><Icon name="target" size={14} /></span>Readiness</span>
           <span className="tile-value">{readiness}%</span>
           <span className="muted small">Weighted by skill importance</span>
         </div>
         <div className="tile">
-          <span className="tile-label">Pace</span>
+          <span className="tile-label"><span className="icon-badge"><Icon name="timer" size={14} /></span>Pace</span>
           <span className={`tile-value status status-${status.tone}`}>
             <span aria-hidden="true" className="status-icon">{status.icon}</span>{status.label}
           </span>
@@ -47,12 +48,12 @@ export function Dashboard({ goal, today }: { goal: Goal; today: ISODate }) {
           </span>
         </div>
         <div className="tile">
-          <span className="tile-label">Streak</span>
+          <span className="tile-label"><span className="icon-badge"><Icon name="flame" size={14} /></span>Streak</span>
           <span className="tile-value">{days} {days === 1 ? 'day' : 'days'}</span>
           <span className="muted small">Rest days don't break it</span>
         </div>
         <div className="tile">
-          <span className="tile-label">Last 7 days</span>
+          <span className="tile-label"><span className="icon-badge"><Icon name="calendar" size={14} /></span>Last 7 days</span>
           <span className="tile-value">{formatMinutes(lastWeek)}</span>
           <span className="muted small">{formatMinutes(p.remainingMinutes)} of study left</span>
         </div>

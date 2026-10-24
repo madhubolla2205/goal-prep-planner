@@ -39,6 +39,25 @@ export interface Goal {
   prompt?: string;
   /** Who broke the goal into skills: Claude, the built-in rules, or the person. */
   source?: 'ai' | 'rules' | 'manual';
+  /** Points the person wants to keep fresh; older goals have none. */
+  notes?: Note[];
+  /** Look of the goal's pages; picked from the goal itself when unset. */
+  theme?: ThemeId;
+}
+
+export type ThemeId = 'code' | 'data' | 'engineering' | 'aptitude' | 'civil' | 'medical' | 'exam' | 'interview';
+
+/** A point to remember, written by the person, shown in the daily quick revision. */
+export interface Note {
+  id: string;
+  text: string;
+  /** The skill the point belongs to, or null for the goal as a whole. */
+  skillId: string | null;
+  /** Pinned points come up in every quick revision. */
+  pinned?: boolean;
+  createdAt: ISODate;
+  /** Days the point was gone through in a quick revision, most recent last. */
+  revised?: ISODate[];
 }
 
 /**

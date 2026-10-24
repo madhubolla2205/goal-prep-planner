@@ -1,3 +1,4 @@
+import type { IconName } from './Icon';
 import type { BlockKind, Goal, PlannedBlock } from '../lib/types';
 
 export function skillName(goal: Goal, skillId: string | null): string {
@@ -17,6 +18,14 @@ export const KIND_LABEL: Record<BlockKind, string> = {
   revise: 'Revise',
   mock: 'Mock',
   analysis: 'Analysis',
+};
+
+export const KIND_ICON: Record<BlockKind, IconName> = {
+  learn: 'book',
+  review: 'repeat',
+  revise: 'pen',
+  mock: 'timer',
+  analysis: 'search',
 };
 
 /** One line on how to spend the block, following the strategy behind it. */

@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { requestDraft } from '../lib/aiPlan';
 import type { ISODate } from '../lib/dates';
 import { goalFromDraft } from '../lib/goalText';
+import { THEMES, THEME_ORDER } from '../lib/themes';
 import type { Goal } from '../lib/types';
+import { Icon } from './Icon';
 
 const EXAMPLES = [
   'Amazon SDE interview in 6 weeks, 2 hours a day',
@@ -34,7 +36,14 @@ export function AskGoal({ today, onCreate, onManual, onCancel }: Props) {
 
   return (
     <form className="ask" onSubmit={submit}>
-      <h2 className="ask-title">What are you preparing for?</h2>
+      <div className="ask-paths" aria-hidden="true">
+        {THEME_ORDER.map((id) => (
+          <span key={id} className="ask-path" style={{ ['--t1' as string]: THEMES[id].from, ['--t2' as string]: THEMES[id].to }}>
+            <Icon name={THEMES[id].icon} size={18} />
+          </span>
+        ))}
+      </div>
+      <h2 className="ask-title">What are you <span className="grad-text">preparing for?</span></h2>
       <p className="muted">Say it the way you'd tell a friend: the exam or interview, when it is, and how much time you have each day.</p>
       <textarea
         aria-label="What are you preparing for?"
@@ -61,7 +70,9 @@ export function AskGoal({ today, onCreate, onManual, onCancel }: Props) {
       </div>
       <div className="actions">
         {onCancel && <button type="button" className="ghost" onClick={onCancel} disabled={busy}>Cancel</button>}
-        <button type="submit" disabled={!text.trim() || busy}>{busy ? 'Building your plan…' : 'Make my plan'}</button>
+        <button type="submit" className="cta" disabled={!text.trim() || busy}>
+          <Icon name="spark" size={16} /> {busy ? 'Building your plan…' : 'Make my plan'}
+        </button>
       </div>
       <button type="button" className="link small manual-link" onClick={onManual} disabled={busy}>
         Prefer to set everything up yourself?

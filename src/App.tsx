@@ -2,21 +2,40 @@ import { useEffect, useMemo, useState } from 'react';
 import { AskGoal } from './components/AskGoal';
 import { Dashboard } from './components/Dashboard';
 import { GoalForm } from './components/GoalForm';
+import { Hero } from './components/Hero';
+import { Icon, type IconName } from './components/Icon';
+import { NotesView } from './components/NotesView';
 import { PlanView } from './components/PlanView';
 import { SkillsView } from './components/SkillsView';
 import { TodayView } from './components/TodayView';
-import { daysBetween, todayISO } from './lib/dates';
+import { todayISO } from './lib/dates';
 import { loadState, saveState, type AppState } from './lib/storage';
+import { WELCOME_THEME, themeFor, type PathTheme } from './lib/themes';
 import type { Goal } from './lib/types';
 
-type Tab = 'today' | 'plan' | 'dashboard' | 'adjust';
+type Tab = 'today' | 'plan' | 'notes' | 'dashboard' | 'adjust';
 
-const TABS: { id: Tab; label: string }[] = [
-  { id: 'today', label: 'Today' },
-  { id: 'plan', label: 'Plan' },
-  { id: 'dashboard', label: 'Dashboard' },
-  { id: 'adjust', label: 'Adjust' },
+const TABS: { id: Tab; label: string; icon: IconName }[] = [
+  { id: 'today', label: 'Today', icon: 'sun' },
+  { id: 'plan', label: 'Plan', icon: 'calendar' },
+  { id: 'notes', label: 'Remember', icon: 'bulb' },
+  { id: 'dashboard', label: 'Progress', icon: 'bars' },
+  { id: 'adjust', label: 'Adjust', icon: 'sliders' },
 ];
+
+/** The theme's colours as CSS variables, for everything under the app root. */
+function themeStyle(theme: PathTheme): React.CSSProperties {
+  return { ['--t1' as string]: theme.from, ['--t2' as string]: theme.to };
+}
+
+function Brand() {
+  return (
+    <h1 className="brand">
+      <span className="brand-mark"><Icon name="target" size={18} /></span>
+      Goal Prep Planner
+    </h1>
+  );
+}
 
 export default function App() {
   const [state, setState] = useState<AppState>(loadState);
@@ -50,9 +69,9 @@ export default function App() {
 
   if (creating || !goal) {
     return (
-      <div className="app">
+      <div className="app" style={themeStyle(WELCOME_THEME)}>
         <header className="topbar">
-          <h1 className="brand">Goal Prep Planner</h1>
+          <Brand />
         </header>
         <main>
           {creating === 'manual' ? (
@@ -70,12 +89,12 @@ export default function App() {
     );
   }
 
-  const daysLeft = daysBetween(today, goal.targetDate);
+  const theme = themeFor(goal);
 
   return (
-    <div className="app">
+    <div className={`app theme-${theme.id}`} style={themeStyle(theme)}>
       <header className="topbar">
-        <h1 className="brand">Goal Prep Planner</h1>
+        <Brand />
         <div className="goal-switch">
           <select
             aria-label="Active goal"
@@ -86,31 +105,27 @@ export default function App() {
               <option key={g.id} value={g.id}>{g.name}</option>
             ))}
           </select>
-          <button className="ghost" onClick={() => setCreating('ask')}>New goal</button>
+          <button className="ghost" onClick={() => setCreating('ask')}><Icon name="plus" size={16} /> New goal</button>
         </div>
       </header>
 
-      <section className="goal-head">
-        <div>
-          <span className="chip">{goal.type === 'exam' ? 'Exam' : 'Interview'}</span>
-          <h2>{goal.name}</h2>
-        </div>
-        <p className="countdown">
-          {daysLeft > 0 ? <><strong>{daysLeft}</strong> days to go</> : daysLeft === 0 ? <strong>Today is the day</strong> : 'Target date passed'}
-        </p>
-      </section>
+      <Hero goal={goal} theme={theme} today={today} />
 
       <nav className="tabs" role="tablist">
         {TABS.map((t) => (
           <button key={t.id} role="tab" aria-selected={tab === t.id} className={tab === t.id ? 'active' : ''} onClick={() => setTab(t.id)}>
-            {t.label}
+            <Icon name={t.icon} size={16} />
+            <span>{t.label}</span>
           </button>
         ))}
       </nav>
 
       <main>
-        {tab === 'today' && <TodayView goal={goal} today={today} onChange={updateGoal} onAdjust={() => setTab('adjust')} />}
+        {tab === 'today' && (
+          <TodayView goal={goal} today={today} onChange={updateGoal} onAdjust={() => setTab('adjust')} onOpenNotes={() => setTab('notes')} />
+        )}
         {tab === 'plan' && <PlanView goal={goal} today={today} />}
+        {tab === 'notes' && <NotesView goal={goal} theme={theme} today={today} onChange={updateGoal} />}
         {tab === 'dashboard' && <Dashboard goal={goal} today={today} />}
         {tab === 'adjust' && <SkillsView goal={goal} onChange={updateGoal} onDelete={() => deleteGoal(goal.id)} />}
       </main>

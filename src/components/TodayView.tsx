@@ -4,16 +4,19 @@ import { buildPlan, entryKind, minutesOnDay, schedule } from '../lib/planner';
 import { newId } from '../lib/storage';
 import { focusSessions } from '../lib/strategy';
 import type { BlockKind, Goal, PlannedBlock } from '../lib/types';
-import { KIND_LABEL, blockName, formatMinutes, kindHint, skillName } from './labels';
+import { Icon } from './Icon';
+import { KIND_ICON, KIND_LABEL, blockName, formatMinutes, kindHint, skillName } from './labels';
+import { QuickRevision } from './QuickRevision';
 
 interface Props {
   goal: Goal;
   today: ISODate;
   onChange: (goal: Goal) => void;
   onAdjust: () => void;
+  onOpenNotes: () => void;
 }
 
-export function TodayView({ goal, today, onChange, onAdjust }: Props) {
+export function TodayView({ goal, today, onChange, onAdjust, onOpenNotes }: Props) {
   const plan = useMemo(() => buildPlan(goal, today), [goal, today]);
   const focusMinutes = useMemo(() => schedule(goal).profile.focusMinutes, [goal]);
   const day = plan[0]?.date === today ? plan[0] : undefined;
@@ -49,11 +52,16 @@ export function TodayView({ goal, today, onChange, onAdjust }: Props) {
           <button className="link" onClick={onAdjust}>Change skills, date or hours</button>
         </div>
       )}
+      <QuickRevision goal={goal} today={today} todaysSkills={day?.blocks.map((b) => b.skillId) ?? []} onChange={onChange} onOpenNotes={onOpenNotes} />
+
       <div className="card">
         <div className="card-head">
-          <h3>{formatDay(today)}</h3>
+          <h3 className="with-icon">
+            <span className="icon-badge"><Icon name="sun" size={16} /></span>
+            Today's mission <span className="muted head-date">{formatDay(today)}</span>
+          </h3>
           {day && (
-            <span className="muted">
+            <span className="muted small">
               {formatMinutes(Math.min(loggedToday, planned))} of {formatMinutes(planned)} done
             </span>
           )}
@@ -71,20 +79,26 @@ export function TodayView({ goal, today, onChange, onAdjust }: Props) {
               const complete = done >= b.minutes;
               const sessions = b.kind === 'mock' ? null : focusSessions(b.minutes, focusMinutes);
               return (
-                <li key={`${b.kind}-${b.skillId}`} className={complete ? 'complete' : ''}>
+                <li key={`${b.kind}-${b.skillId}`} className={`task task-${b.kind} ${complete ? 'complete' : ''}`}>
+                  <span className="task-icon"><Icon name={KIND_ICON[b.kind]} size={20} /></span>
                   <div className="task-main">
-                    <span className={`kind kind-${b.kind}`}>{KIND_LABEL[b.kind]}</span>
-                    <span className="task-name">{blockName(goal, b)}</span>
-                    <span className="muted small">{formatMinutes(Math.min(done, b.minutes))} / {formatMinutes(b.minutes)}</span>
+                    <div className="task-title">
+                      <span className="kind">{KIND_LABEL[b.kind]}</span>
+                      <span className="task-name">{blockName(goal, b)}</span>
+                    </div>
                     <span className="task-hint muted small">
                       {kindHint(goal, b.kind)}
                       {sessions && <> · {sessions.count} × {sessions.minutes} min focus sessions</>}
                     </span>
+                    <div className="task-progress">
+                      <Progress value={Math.min(1, done / b.minutes)} />
+                      <span className="muted small">{formatMinutes(Math.min(done, b.minutes))} / {formatMinutes(b.minutes)}</span>
+                    </div>
                   </div>
                   <div className="task-actions">
                     <button className="ghost small" onClick={() => log(b.skillId, 15, b.kind)}>+15 min</button>
-                    <button className="small" disabled={complete} onClick={() => log(b.skillId, b.minutes - done, b.kind)}>
-                      {complete ? 'Done' : 'Mark done'}
+                    <button className="small done-btn" disabled={complete} onClick={() => log(b.skillId, b.minutes - done, b.kind)}>
+                      <Icon name="check" size={14} /> {complete ? 'Done' : 'Mark done'}
                     </button>
                   </div>
                 </li>
@@ -95,7 +109,10 @@ export function TodayView({ goal, today, onChange, onAdjust }: Props) {
       </div>
 
       <div className="card">
-        <h3>Log other study time</h3>
+        <h3 className="with-icon">
+          <span className="icon-badge"><Icon name="timer" size={16} /></span>
+          Log other study time
+        </h3>
         <form
           className="inline-form"
           onSubmit={(e) => {
