@@ -24,12 +24,34 @@ function serviceWorker(): Plugin {
   }
 }
 
+/**
+ * Adds the GoatCounter visitor counter when GOATCOUNTER_CODE is set (only the
+ * GitHub Pages workflow sets it). GoatCounter is free, sets no cookies and
+ * stores no personal data. Local builds and the Android app stay untracked.
+ */
+function visitorCounter(): Plugin {
+  const code = process.env.GOATCOUNTER_CODE?.trim()
+  if (code && !/^[a-z0-9-]+$/.test(code)) throw new Error(`GOATCOUNTER_CODE "${code}" is not a GoatCounter site code`)
+  return {
+    name: 'visitor-counter',
+    apply: 'build',
+    transformIndexHtml() {
+      if (!code) return []
+      return [{
+        tag: 'script',
+        attrs: { 'data-goatcounter': `https://${code}.goatcounter.com/count`, async: true, src: 'https://gc.zgo.at/count.js' },
+        injectTo: 'body',
+      }]
+    },
+  }
+}
+
 // https://vite.dev/config/
 export default defineConfig({
   // GitHub Pages serves the app from /goal-prep-planner/; the deploy workflow
   // sets BASE_PATH. Local dev and `npm start` keep serving from the root.
   base: process.env.BASE_PATH ?? '/',
-  plugins: [react(), serviceWorker()],
+  plugins: [react(), serviceWorker(), visitorCounter()],
   server: {
     // `npm run server` runs the API alongside the dev server.
     proxy: { '/api': 'http://localhost:8787' },

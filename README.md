@@ -1,5 +1,7 @@
 # Goal Prep Planner
 
+[![Android app downloads](https://img.shields.io/github/downloads/madhubolla2205/goal-prep-planner/total?label=Android%20downloads)](https://github.com/madhubolla2205/goal-prep-planner/releases)
+
 Plan and track preparation for a goal: an exam (GATE, CAT, …) or an interview at a target company. The app does planning and daily tracking only; it does not provide study content.
 
 ## What it does
@@ -42,6 +44,10 @@ Android app: the same app wrapped with [Capacitor](https://capacitorjs.com/) (`a
 - `src/lib/backup.ts`: backup file format, validation and merging (tested in `backup.test.ts`)
 - `src/lib/device.ts`, `pwa/sw.js`, `public/manifest.webmanifest`: install prompt, persistent storage and the offline service worker; `vite.config.ts` fills the worker with the build's file list
 - `src/components/`: the "What are you preparing for?" screen, Today, Plan, Dashboard, Adjust and the manual goal form
+
+## Usage numbers
+
+Both counters are free. The badge at the top counts downloads of every APK on the Releases page (people who download but never install are counted too). Visitors to the site are counted by [GoatCounter](https://www.goatcounter.com/), which sets no cookies and stores no personal data. Visitor numbers are at https://goal-prep-planner.goatcounter.com (the site code is set in `.github/workflows/deploy-pages.yml`; a repository variable `GOATCOUNTER_CODE` overrides it). Local builds and the Android app are not counted.
 
 ## Next steps
 
