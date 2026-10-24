@@ -4,7 +4,7 @@ export type IconName =
   | PathIcon
   | 'check' | 'flame' | 'target' | 'sun' | 'calendar' | 'bars' | 'sliders' | 'bulb' | 'star'
   | 'plus' | 'trash' | 'repeat' | 'timer' | 'search' | 'pen' | 'spark' | 'flag'
-  | 'download' | 'upload' | 'shield' | 'phone';
+  | 'download' | 'upload' | 'shield' | 'phone' | 'grid';
 
 const PATHS: Record<IconName, string> = {
   code: 'M8 6l-6 6 6 6M16 6l6 6-6 6',
@@ -36,6 +36,7 @@ const PATHS: Record<IconName, string> = {
   upload: 'M12 15V3M7 8l5-5 5 5M4 21h16',
   shield: 'M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z',
   phone: 'M8 2h8a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zM11 18h2',
+  grid: 'M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z',
 };
 
 export function Icon({ name, size = 18, className }: { name: IconName; size?: number; className?: string }) {

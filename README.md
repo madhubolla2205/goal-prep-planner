@@ -7,6 +7,7 @@ Plan and track preparation for a goal: an exam (GATE, CAT, …) or an interview 
 ## What it does
 
 - **Just ask.** Type what you're preparing for in one sentence, e.g. "Amazon SDE interview in 6 weeks, 2 hours a day, weekends off". The app works out the goal, date, daily hours, rest days and the skills to cover, and builds the plan. With an Anthropic API key, Claude breaks the goal down for that specific company or exam; without one, built-in rules handle common exams and roles. Estimates are scaled to fit the time you have. Prefer forms? "Set everything up yourself" still offers templates and every option.
+- **All your plans in one place.** The home page lists every plan as a card: active ones (soonest target first) and past ones, with readiness, pace, today's progress and streak. Tap a card to open that plan, or "New plan" to start another. With more than one plan the app opens on this page; "All plans" or the logo brings you back.
 - **Adjust.** Each goal is a list of skills with an importance (1–5), an estimated number of hours and your confidence (0–100%). All of it is editable.
 - **Schedule.** A day-by-day plan from today to the target date, in 15-minute blocks. Important, low-confidence skills come first, skills rotate so none goes untouched for long, and the last ~15% of study days are reserved for revision and mock tests.
 - **Adaptive.** The plan is rebuilt every day from what you actually logged, so missed or extra study reshapes every later day. Time logged today doesn't change today's checklist.
@@ -41,9 +42,10 @@ Android app: the same app wrapped with [Capacitor](https://capacitorjs.com/) (`a
 - `server/`: the `/api/plan` endpoint (Anthropic SDK with structured outputs) and a static file server for production
 - `src/lib/templates.ts`: starting skill lists per goal type
 - `src/lib/types.ts`, `src/lib/dates.ts`, `src/lib/storage.ts`: model, date helpers, persistence
+- `src/lib/plans.ts`: per-plan summary and active/past grouping for the home page (tested in `plans.test.ts`)
 - `src/lib/backup.ts`: backup file format, validation and merging (tested in `backup.test.ts`)
 - `src/lib/device.ts`, `pwa/sw.js`, `public/manifest.webmanifest`: install prompt, persistent storage and the offline service worker; `vite.config.ts` fills the worker with the build's file list
-- `src/components/`: the "What are you preparing for?" screen, Today, Plan, Dashboard, Adjust and the manual goal form
+- `src/components/`: the "What are you preparing for?" screen, the home page of all plans, Today, Plan, Dashboard, Adjust and the manual goal form
 
 ## Usage numbers
 

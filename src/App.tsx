@@ -3,6 +3,7 @@ import { AskGoal } from './components/AskGoal';
 import { Dashboard } from './components/Dashboard';
 import { GoalForm } from './components/GoalForm';
 import { Hero } from './components/Hero';
+import { Home } from './components/Home';
 import { Icon, type IconName } from './components/Icon';
 import { NotesView } from './components/NotesView';
 import { PlanView } from './components/PlanView';
@@ -30,11 +31,15 @@ function themeStyle(theme: PathTheme): React.CSSProperties {
   return { ['--t1' as string]: theme.from, ['--t2' as string]: theme.to };
 }
 
-function Brand() {
+function Brand({ onHome }: { onHome?: () => void }) {
+  const mark = <img className="brand-mark" src={`${import.meta.env.BASE_URL}favicon.svg`} alt="" width={32} height={32} />;
   return (
     <h1 className="brand">
-      <img className="brand-mark" src={`${import.meta.env.BASE_URL}favicon.svg`} alt="" width={32} height={32} />
-      Goal Prep Planner
+      {onHome ? (
+        <button className="brand brand-home" onClick={onHome} aria-label="Goal Prep Planner, all plans">{mark} Goal Prep Planner</button>
+      ) : (
+        <>{mark} Goal Prep Planner</>
+      )}
     </h1>
   );
 }
@@ -43,6 +48,8 @@ export default function App() {
   const [state, setState] = useState<AppState>(loadState);
   const [tab, setTab] = useState<Tab>('today');
   const [creating, setCreating] = useState<false | 'ask' | 'manual'>(false);
+  // With more than one plan the app opens on the list of plans; with one it opens that plan.
+  const [view, setView] = useState<'home' | 'plan'>(() => (state.goals.length > 1 ? 'home' : 'plan'));
 
   const [protectedData, setProtectedData] = useState<boolean | null>(null);
   const today = todayISO();
@@ -66,12 +73,26 @@ export default function App() {
   const addGoal = (g: Goal) => {
     setState((s) => ({ goals: [...s.goals, g], activeGoalId: g.id }));
     setCreating(false);
+    setView('plan');
     setTab('today');
+  };
+
+  const openGoal = (id: string) => {
+    setState((s) => ({ ...s, activeGoalId: id }));
+    setView('plan');
+    setTab('today');
+    window.scrollTo(0, 0);
+  };
+
+  const goHome = () => {
+    setView('home');
+    window.scrollTo(0, 0);
   };
 
   const restore = (next: AppState) => {
     setState(next);
     setCreating(false);
+    setView(next.goals.length > 1 ? 'home' : 'plan');
     setTab('today');
   };
 
@@ -81,13 +102,14 @@ export default function App() {
       const goals = s.goals.filter((g) => g.id !== id);
       return { goals, activeGoalId: goals[0]?.id ?? null };
     });
+    setView('home');
   };
 
   if (creating || !goal) {
     return (
       <div className="app" style={themeStyle(WELCOME_THEME)}>
         <header className="topbar">
-          <Brand />
+          <Brand onHome={goal ? () => { setCreating(false); goHome(); } : undefined} />
         </header>
         <main>
           {creating === 'manual' ? (
@@ -106,23 +128,28 @@ export default function App() {
     );
   }
 
+  if (view === 'home') {
+    return (
+      <div className="app" style={themeStyle(WELCOME_THEME)}>
+        <header className="topbar">
+          <Brand />
+        </header>
+        <main>
+          <Home goals={state.goals} today={today} onOpen={openGoal} onNew={() => setCreating('ask')} />
+        </main>
+      </div>
+    );
+  }
+
   const theme = themeFor(goal);
 
   return (
     <div className={`app theme-${theme.id}`} style={themeStyle(theme)}>
       <header className="topbar">
-        <Brand />
+        <Brand onHome={goHome} />
         <div className="goal-switch">
-          <select
-            aria-label="Active goal"
-            value={goal.id}
-            onChange={(e) => setState((s) => ({ ...s, activeGoalId: e.target.value }))}
-          >
-            {state.goals.map((g) => (
-              <option key={g.id} value={g.id}>{g.name}</option>
-            ))}
-          </select>
-          <button className="ghost" onClick={() => setCreating('ask')}><Icon name="plus" size={16} /> New goal</button>
+          <button className="ghost" onClick={goHome}><Icon name="grid" size={16} /> All plans</button>
+          <button className="ghost" onClick={() => setCreating('ask')}><Icon name="plus" size={16} /> New plan</button>
         </div>
       </header>
 

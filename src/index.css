@@ -54,7 +54,7 @@
 }
 
 /* Colours derived from the goal's theme. Mixing towards --text darkens in light mode and lightens in dark mode. */
-.app, .theme-swatch, .ask-path {
+.app, .theme-swatch, .ask-path, .plan-card {
   --accent: var(--t1);
   --accent-ink: color-mix(in oklab, var(--t1) 72%, var(--text));
   --accent-soft: color-mix(in oklab, var(--t1) 11%, var(--surface));
@@ -437,3 +437,41 @@ legend { font-size: 0.9rem; color: var(--text-2); margin-bottom: 6px; }
 .data-status.ok svg { color: var(--good); }
 .data-error { flex-basis: 100%; margin: 0; color: var(--critical); }
 .restore-link { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
+
+/* Home: every plan on the device */
+.home-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: 6px; }
+.home-head h2 { font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 800; }
+.home-head p { margin: 4px 0 0; }
+.home-section { display: flex; align-items: center; gap: 8px; margin: 8px 0 12px; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-2); }
+.plan-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.plan-card, .plan-new {
+  align-items: stretch; justify-content: flex-start;
+  display: flex; flex-direction: column; text-align: left; padding: 0; overflow: hidden;
+  border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); color: var(--text);
+  box-shadow: var(--shadow); font-weight: 400; transition: transform 0.15s, box-shadow 0.15s;
+}
+.plan-card:not(:disabled):hover { transform: translateY(-2px); box-shadow: 0 18px 36px -20px var(--t1); }
+.plan-card-band { position: relative; isolation: isolate; overflow: hidden; display: flex; flex-direction: column; gap: 4px; padding: 16px 18px; color: #fff; background: var(--grad); }
+.plan-card-art { position: absolute; right: -14px; top: -14px; z-index: -1; opacity: 0.16; stroke-width: 1.4; transform: rotate(-8deg); }
+.plan-card-path { display: inline-flex; align-items: center; gap: 5px; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.92; }
+.plan-card-name { font-size: 1.15rem; font-weight: 800; line-height: 1.25; overflow-wrap: anywhere; }
+.plan-card-when { font-size: 0.8rem; opacity: 0.92; }
+.plan-card-body { display: flex; flex-direction: column; gap: 10px; padding: 14px 18px 16px; }
+.plan-card-ready { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.plan-card-ready strong { font-size: 1.3rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.plan-card-facts { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.plan-card-facts span { display: inline-flex; align-items: center; gap: 5px; }
+.plan-pace { font-size: 0.72rem; font-weight: 800; padding: 2px 9px; border-radius: 999px; }
+.pace-good { color: var(--good); background: color-mix(in oklab, var(--good) 12%, var(--surface)); }
+.pace-warning { color: var(--warning); background: color-mix(in oklab, var(--warning) 14%, var(--surface)); }
+.pace-critical { color: var(--critical); background: color-mix(in oklab, var(--critical) 12%, var(--surface)); }
+.plan-card.past .plan-card-band { filter: saturate(0.45); }
+.plan-new { align-items: center; justify-content: center; gap: 6px; min-height: 200px; padding: 20px; text-align: center; border: 2px dashed var(--border); background: transparent; box-shadow: none; }
+.plan-new:not(:disabled):hover { border-color: var(--accent-line); background: var(--accent-soft); box-shadow: none; }
+.plan-new-icon { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 14px; background: var(--grad); color: #fff; }
+.brand-home { background: none; border: 0; padding: 0; color: inherit; box-shadow: none; }
+.brand-home:not(:disabled):hover { box-shadow: none; }
+@media (max-width: 560px) {
+  .home-head > button { width: 100%; justify-content: center; }
+  .plan-new { min-height: 120px; }
+}
