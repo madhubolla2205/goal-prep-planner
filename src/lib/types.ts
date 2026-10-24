@@ -33,6 +33,10 @@ export interface Goal {
   restDays: number[];
   skills: Skill[];
   log: LogEntry[];
+  /** The sentence the goal was created from, if any. */
+  prompt?: string;
+  /** Who broke the goal into skills: Claude, the built-in rules, or the person. */
+  source?: 'ai' | 'rules' | 'manual';
 }
 
 export type BlockKind = 'learn' | 'revise' | 'mock';

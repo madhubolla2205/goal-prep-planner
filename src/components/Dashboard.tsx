@@ -70,7 +70,10 @@ export function Dashboard({ goal, today }: { goal: Goal; today: ISODate }) {
                 {d.minutes > 0 && <div className="bar" style={{ height: `${(d.minutes / peak) * 100}%` }} />}
               </div>
               <span className="tip">{formatDay(d.date)}<br /><strong>{formatMinutes(d.minutes)}</strong></span>
-              <span className="bar-label">{d.date === today ? 'Today' : formatDay(d.date).split(',')[0]}</span>
+              <span className="bar-label">
+                <span className="label-long">{d.date === today ? 'Today' : formatDay(d.date).split(',')[0]}</span>
+                <span className="label-short">{formatDay(d.date).charAt(0)}</span>
+              </span>
             </div>
           ))}
           <div className="target-line" aria-hidden="true" />

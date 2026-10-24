@@ -173,3 +173,24 @@ legend { font-size: 0.9rem; color: var(--text-2); margin-bottom: 6px; }
 
 .fit { margin: 0; padding: 10px 12px; border-radius: 8px; border-left: 3px solid var(--good); background: var(--accent-soft); color: var(--text-2); font-size: 0.9rem; }
 .fit-short { border-left-color: var(--critical); }
+
+.ask { max-width: 640px; margin: 48px auto 0; display: flex; flex-direction: column; gap: 14px; }
+.ask-title { font-size: 1.8rem; }
+.ask p { margin: 0; }
+.ask textarea {
+  font: inherit; font-size: 1.1rem; color: var(--text); background: var(--surface);
+  border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; resize: vertical;
+}
+.ask textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+.examples { display: flex; flex-wrap: wrap; gap: 6px; }
+.examples .pill { font-size: 0.85rem; text-align: left; }
+.manual-link { align-self: center; color: var(--muted); }
+.intro { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; border-radius: var(--radius); background: var(--accent-soft); color: var(--text-2); }
+.intro p { margin: 0; }
+.intro strong { color: var(--text); }
+.intro .link { align-self: flex-start; }
+.label-short { display: none; }
+@media (max-width: 520px) {
+  .label-long { display: none; }
+  .label-short { display: inline; }
+}

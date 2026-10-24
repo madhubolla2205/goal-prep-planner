@@ -4,8 +4,8 @@ Plan and track preparation for a goal: an exam (GATE, CAT, …) or an interview 
 
 ## What it does
 
-- **Goals.** Pick a template (software engineer interview, data/ML interview, GATE CSE, CAT) or start from scratch, then set the target date, daily study hours and rest days. The form tells you up front whether the estimated work fits your schedule.
-- **Skills.** Each goal is a list of skills with an importance (1–5), an estimated number of hours and your confidence (0–100%). All of it is editable.
+- **Just ask.** Type what you're preparing for in one sentence, e.g. "Amazon SDE interview in 6 weeks, 2 hours a day, weekends off". The app works out the goal, date, daily hours, rest days and the skills to cover, and builds the plan. With an Anthropic API key, Claude breaks the goal down for that specific company or exam; without one, built-in rules handle common exams and roles. Estimates are scaled to fit the time you have. Prefer forms? "Set everything up yourself" still offers templates and every option.
+- **Adjust.** Each goal is a list of skills with an importance (1–5), an estimated number of hours and your confidence (0–100%). All of it is editable.
 - **Schedule.** A day-by-day plan from today to the target date, in 15-minute blocks. Important, low-confidence skills come first, skills rotate so none goes untouched for long, and the last ~15% of study days are reserved for revision and mock tests.
 - **Adaptive.** The plan is rebuilt every day from what you actually logged, so missed or extra study reshapes every later day. Time logged today doesn't change today's checklist.
 - **Daily tracking.** Today's tasks with "Mark done" and "+15 min", plus a form to log any other study time or a mock test, with undo.
@@ -17,18 +17,23 @@ Data is stored in the browser's localStorage for now.
 
 ```bash
 npm install
-npm run dev     # http://localhost:5173
-npm test        # planner engine tests
-npm run build
+npm run dev                                # app on http://localhost:5173
+ANTHROPIC_API_KEY=sk-ant-... npm run server  # optional, in a second terminal: Claude-generated plans
+npm test
 ```
+
+Production: `npm run build`, then `ANTHROPIC_API_KEY=... npm start` serves the app and the API on port 8787 (`PORT` to change). Without a key the server still runs and the app uses its built-in rules. Each Claude-generated plan is one request to `claude-opus-5-5`.
 
 ## Code map
 
 - `src/lib/planner.ts`: scheduling engine, pace, readiness and streak (pure functions, tested in `planner.test.ts`)
+- `src/lib/goalText.ts`: turns a sentence into a goal (date, hours, rest days, skills) with built-in rules, and validates AI responses
+- `src/lib/aiPlan.ts`: calls `/api/plan` and falls back to the rules
+- `server/`: the `/api/plan` endpoint (Anthropic SDK with structured outputs) and a static file server for production
 - `src/lib/templates.ts`: starting skill lists per goal type
 - `src/lib/types.ts`, `src/lib/dates.ts`, `src/lib/storage.ts`: model, date helpers, persistence
-- `src/components/`: Today, Plan, Dashboard, Skills and the goal form
+- `src/components/`: the "What are you preparing for?" screen, Today, Plan, Dashboard, Adjust and the manual goal form
 
 ## Next steps
 
-Accounts and sync (Supabase), AI-assisted skill breakdown for a specific exam or company (Claude API), reminders, and mock-test score tracking.
+Accounts and sync (Supabase), reminders, and mock-test score tracking.

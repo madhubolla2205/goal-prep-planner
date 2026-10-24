@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { AskGoal } from './components/AskGoal';
 import { Dashboard } from './components/Dashboard';
 import { GoalForm } from './components/GoalForm';
 import { PlanView } from './components/PlanView';
@@ -8,19 +9,19 @@ import { daysBetween, todayISO } from './lib/dates';
 import { loadState, saveState, type AppState } from './lib/storage';
 import type { Goal } from './lib/types';
 
-type Tab = 'today' | 'plan' | 'dashboard' | 'skills';
+type Tab = 'today' | 'plan' | 'dashboard' | 'adjust';
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'today', label: 'Today' },
   { id: 'plan', label: 'Plan' },
   { id: 'dashboard', label: 'Dashboard' },
-  { id: 'skills', label: 'Skills' },
+  { id: 'adjust', label: 'Adjust' },
 ];
 
 export default function App() {
   const [state, setState] = useState<AppState>(loadState);
   const [tab, setTab] = useState<Tab>('today');
-  const [creating, setCreating] = useState(false);
+  const [creating, setCreating] = useState<false | 'ask' | 'manual'>(false);
   const today = todayISO();
 
   useEffect(() => saveState(state), [state]);
@@ -54,7 +55,16 @@ export default function App() {
           <h1 className="brand">Goal Prep Planner</h1>
         </header>
         <main>
-          <GoalForm today={today} onCreate={addGoal} onCancel={goal ? () => setCreating(false) : undefined} />
+          {creating === 'manual' ? (
+            <GoalForm today={today} onCreate={addGoal} onCancel={() => setCreating(goal ? false : 'ask')} />
+          ) : (
+            <AskGoal
+              today={today}
+              onCreate={addGoal}
+              onManual={() => setCreating('manual')}
+              onCancel={goal ? () => setCreating(false) : undefined}
+            />
+          )}
         </main>
       </div>
     );
@@ -76,7 +86,7 @@ export default function App() {
               <option key={g.id} value={g.id}>{g.name}</option>
             ))}
           </select>
-          <button className="ghost" onClick={() => setCreating(true)}>New goal</button>
+          <button className="ghost" onClick={() => setCreating('ask')}>New goal</button>
         </div>
       </header>
 
@@ -99,10 +109,10 @@ export default function App() {
       </nav>
 
       <main>
-        {tab === 'today' && <TodayView goal={goal} today={today} onChange={updateGoal} />}
+        {tab === 'today' && <TodayView goal={goal} today={today} onChange={updateGoal} onAdjust={() => setTab('adjust')} />}
         {tab === 'plan' && <PlanView goal={goal} today={today} />}
         {tab === 'dashboard' && <Dashboard goal={goal} today={today} />}
-        {tab === 'skills' && <SkillsView goal={goal} onChange={updateGoal} onDelete={() => deleteGoal(goal.id)} />}
+        {tab === 'adjust' && <SkillsView goal={goal} onChange={updateGoal} onDelete={() => deleteGoal(goal.id)} />}
       </main>
     </div>
   );
