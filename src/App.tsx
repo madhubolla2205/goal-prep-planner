@@ -8,7 +8,9 @@ import { NotesView } from './components/NotesView';
 import { PlanView } from './components/PlanView';
 import { SkillsView } from './components/SkillsView';
 import { TodayView } from './components/TodayView';
+import { YourData } from './components/YourData';
 import { todayISO } from './lib/dates';
+import { protectStorage } from './lib/device';
 import { loadState, saveState, type AppState } from './lib/storage';
 import { WELCOME_THEME, themeFor, type PathTheme } from './lib/themes';
 import type { Goal } from './lib/types';
@@ -31,7 +33,7 @@ function themeStyle(theme: PathTheme): React.CSSProperties {
 function Brand() {
   return (
     <h1 className="brand">
-      <span className="brand-mark"><Icon name="target" size={18} /></span>
+      <img className="brand-mark" src={`${import.meta.env.BASE_URL}favicon.svg`} alt="" width={32} height={32} />
       Goal Prep Planner
     </h1>
   );
@@ -41,9 +43,17 @@ export default function App() {
   const [state, setState] = useState<AppState>(loadState);
   const [tab, setTab] = useState<Tab>('today');
   const [creating, setCreating] = useState<false | 'ask' | 'manual'>(false);
+
+  const [protectedData, setProtectedData] = useState<boolean | null>(null);
   const today = todayISO();
+  const hasGoals = state.goals.length > 0;
 
   useEffect(() => saveState(state), [state]);
+
+  // Once there's something worth keeping, ask the browser not to clear it.
+  useEffect(() => {
+    if (hasGoals) void protectStorage().then(setProtectedData);
+  }, [hasGoals]);
 
   const goal = useMemo(
     () => state.goals.find((g) => g.id === state.activeGoalId) ?? state.goals[0],
@@ -55,6 +65,12 @@ export default function App() {
 
   const addGoal = (g: Goal) => {
     setState((s) => ({ goals: [...s.goals, g], activeGoalId: g.id }));
+    setCreating(false);
+    setTab('today');
+  };
+
+  const restore = (next: AppState) => {
+    setState(next);
     setCreating(false);
     setTab('today');
   };
@@ -82,6 +98,7 @@ export default function App() {
               onCreate={addGoal}
               onManual={() => setCreating('manual')}
               onCancel={goal ? () => setCreating(false) : undefined}
+              restore={goal ? undefined : { state, onRestore: restore }}
             />
           )}
         </main>
@@ -127,7 +144,12 @@ export default function App() {
         {tab === 'plan' && <PlanView goal={goal} today={today} />}
         {tab === 'notes' && <NotesView goal={goal} theme={theme} today={today} onChange={updateGoal} />}
         {tab === 'dashboard' && <Dashboard goal={goal} today={today} />}
-        {tab === 'adjust' && <SkillsView goal={goal} onChange={updateGoal} onDelete={() => deleteGoal(goal.id)} />}
+        {tab === 'adjust' && (
+          <div className="stack">
+            <SkillsView goal={goal} onChange={updateGoal} onDelete={() => deleteGoal(goal.id)} />
+            <YourData state={state} today={today} protectedData={protectedData} onRestore={restore} />
+          </div>
+        )}
       </main>
     </div>
   );

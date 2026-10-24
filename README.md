@@ -11,7 +11,10 @@ Plan and track preparation for a goal: an exam (GATE, CAT, …) or an interview 
 - **Daily tracking.** Today's tasks with "Mark done" and "+15 min", plus a form to log any other study time or a mock test, with undo.
 - **Dashboard.** Overall readiness (weighted by importance), pace (minutes/day now needed vs. planned), streak (rest days don't break it), the last 7 days, a 14-day study chart against your daily target, and readiness per skill, weakest first.
 
-Data is stored in the browser's localStorage for now.
+- **Install and offline.** The app can be added to a phone's home screen or installed on a computer, and works without internet once opened.
+- **Backup and restore.** "Your data" (under Adjust) saves every goal to a JSON file and restores it on any device, which is how plans move between devices without an account. A fresh device offers "Restore it" on the first screen.
+
+Data is stored in the browser's localStorage. Once a goal exists, the app asks the browser to keep that data even when space runs low (`navigator.storage.persist`).
 
 ## Run it
 
@@ -34,8 +37,10 @@ GitHub Pages: every push to `main` builds the app and publishes it to https://ma
 - `server/`: the `/api/plan` endpoint (Anthropic SDK with structured outputs) and a static file server for production
 - `src/lib/templates.ts`: starting skill lists per goal type
 - `src/lib/types.ts`, `src/lib/dates.ts`, `src/lib/storage.ts`: model, date helpers, persistence
+- `src/lib/backup.ts`: backup file format, validation and merging (tested in `backup.test.ts`)
+- `src/lib/device.ts`, `pwa/sw.js`, `public/manifest.webmanifest`: install prompt, persistent storage and the offline service worker; `vite.config.ts` fills the worker with the build's file list
 - `src/components/`: the "What are you preparing for?" screen, Today, Plan, Dashboard, Adjust and the manual goal form
 
 ## Next steps
 
-Accounts and sync (Supabase), reminders, and mock-test score tracking.
+Reminders, a nudge to back up, and mock-test score tracking.

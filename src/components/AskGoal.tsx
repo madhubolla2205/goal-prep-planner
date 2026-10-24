@@ -3,8 +3,10 @@ import { requestDraft } from '../lib/aiPlan';
 import type { ISODate } from '../lib/dates';
 import { goalFromDraft } from '../lib/goalText';
 import { THEMES, THEME_ORDER } from '../lib/themes';
+import type { AppState } from '../lib/storage';
 import type { Goal } from '../lib/types';
 import { Icon } from './Icon';
+import { RestoreButton } from './YourData';
 
 const EXAMPLES = [
   'Amazon SDE interview in 6 weeks, 2 hours a day',
@@ -18,9 +20,11 @@ interface Props {
   onCreate: (goal: Goal) => void;
   onManual: () => void;
   onCancel?: () => void;
+  /** Offered on a fresh device, to pick up a plan from a backup file. */
+  restore?: { state: AppState; onRestore: (next: AppState) => void };
 }
 
-export function AskGoal({ today, onCreate, onManual, onCancel }: Props) {
+export function AskGoal({ today, onCreate, onManual, onCancel, restore }: Props) {
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -77,6 +81,11 @@ export function AskGoal({ today, onCreate, onManual, onCancel }: Props) {
       <button type="button" className="link small manual-link" onClick={onManual} disabled={busy}>
         Prefer to set everything up yourself?
       </button>
+      {restore && (
+        <div className="restore-link">
+          <RestoreButton {...restore} className="link small" label="Have a backup from another device? Restore it" />
+        </div>
+      )}
     </form>
   );
 }

@@ -3,7 +3,8 @@ import type { PathIcon } from '../lib/themes';
 export type IconName =
   | PathIcon
   | 'check' | 'flame' | 'target' | 'sun' | 'calendar' | 'bars' | 'sliders' | 'bulb' | 'star'
-  | 'plus' | 'trash' | 'repeat' | 'timer' | 'search' | 'pen' | 'spark' | 'flag';
+  | 'plus' | 'trash' | 'repeat' | 'timer' | 'search' | 'pen' | 'spark' | 'flag'
+  | 'download' | 'upload' | 'shield' | 'phone';
 
 const PATHS: Record<IconName, string> = {
   code: 'M8 6l-6 6 6 6M16 6l6 6-6 6',
@@ -31,6 +32,10 @@ const PATHS: Record<IconName, string> = {
   pen: 'M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4',
   spark: 'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 17l.7 1.8 1.8.7-1.8.7L19 22l-.7-1.8-1.8-.7 1.8-.7z',
   flag: 'M5 21V4M5 4h11l-2 4 2 4H5',
+  download: 'M12 3v12M7 10l5 5 5-5M4 21h16',
+  upload: 'M12 15V3M7 8l5-5 5 5M4 21h16',
+  shield: 'M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z',
+  phone: 'M8 2h8a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zM11 18h2',
 };
 
 export function Icon({ name, size = 18, className }: { name: IconName; size?: number; className?: string }) {

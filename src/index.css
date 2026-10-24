@@ -81,7 +81,7 @@ h3 { font-size: 1.05rem; font-weight: 700; }
 
 .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 0; flex-wrap: wrap; }
 .brand { display: flex; align-items: center; gap: 10px; font-size: 1.05rem; font-weight: 800; }
-.brand-mark { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 10px; background: var(--grad); color: #fff; box-shadow: 0 6px 16px -6px var(--t1); }
+.brand-mark { display: block; width: 32px; height: 32px; border-radius: 10px; box-shadow: 0 6px 16px -6px var(--t1); }
 .goal-switch { display: flex; gap: 8px; flex-wrap: wrap; }
 .goal-switch select { max-width: 220px; }
 
@@ -424,3 +424,16 @@ legend { font-size: 0.9rem; color: var(--text-2); margin-bottom: 6px; }
   .tabs button { flex-direction: column; gap: 2px; padding: 7px 4px; min-width: 0; }
   .tabs button span { font-size: 0.7rem; }
 }
+
+/* Your data: backup, install, storage */
+.your-data > p { margin: 0 0 4px; }
+.data-row { display: flex; justify-content: space-between; align-items: center; gap: 12px 16px; flex-wrap: wrap; padding: 14px 0; border-top: 1px solid var(--border); }
+.data-row:first-of-type { margin-top: 12px; }
+.data-row > div:first-child { flex: 1 1 260px; }
+.data-row p { margin: 2px 0 0; }
+.data-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.data-status { display: flex; align-items: flex-start; gap: 8px; margin: 0; padding: 10px 12px; border-radius: 12px; background: var(--surface-2); color: var(--text-2); }
+.data-status svg { flex: none; margin-top: 2px; }
+.data-status.ok svg { color: var(--good); }
+.data-error { flex-basis: 100%; margin: 0; color: var(--critical); }
+.restore-link { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
