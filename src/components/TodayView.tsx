@@ -9,9 +9,10 @@ interface Props {
   goal: Goal;
   today: ISODate;
   onChange: (goal: Goal) => void;
+  onAdjust: () => void;
 }
 
-export function TodayView({ goal, today, onChange }: Props) {
+export function TodayView({ goal, today, onChange, onAdjust }: Props) {
   const plan = useMemo(() => buildPlan(goal, today), [goal, today]);
   const day = plan[0]?.date === today ? plan[0] : undefined;
   const todaysLog = goal.log.filter((e) => e.date === today);
@@ -32,8 +33,20 @@ export function TodayView({ goal, today, onChange }: Props) {
 
   const planned = day?.blocks.reduce((s, b) => s + b.minutes, 0) ?? 0;
 
+  const showIntro = goal.prompt && goal.log.length === 0;
+
   return (
     <div className="stack">
+      {showIntro && (
+        <div className="intro">
+          <p>
+            Your plan for <strong>“{goal.prompt}”</strong>: {goal.skills.length} skills to cover by {formatDay(goal.targetDate)},{' '}
+            {formatMinutes(goal.dailyMinutes)} a day.{' '}
+            {goal.source === 'ai' ? 'Claude broke it down for this goal.' : 'Built from a standard breakdown for this kind of goal.'}
+          </p>
+          <button className="link" onClick={onAdjust}>Change skills, date or hours</button>
+        </div>
+      )}
       <div className="card">
         <div className="card-head">
           <h3>{formatDay(today)}</h3>

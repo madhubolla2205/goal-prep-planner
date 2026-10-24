@@ -52,6 +52,7 @@ export function GoalForm({ today, onCreate, onCancel }: Props) {
       restDays,
       skills: template.skills.map((s) => ({ ...s, id: newId(), confidence: 30 })),
       log: [],
+      source: 'manual',
     });
   };
 
