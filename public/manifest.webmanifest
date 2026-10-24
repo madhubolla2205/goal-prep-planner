@@ -1,0 +1,16 @@
+{
+  "id": "./",
+  "name": "Goal Prep Planner",
+  "short_name": "Prep Planner",
+  "description": "Plan and track your preparation for an exam or interview, day by day.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f5fa",
+  "theme_color": "#7c3aed",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
