@@ -29,6 +29,8 @@ Production: `npm run build`, then `ANTHROPIC_API_KEY=... npm start` serves the a
 
 GitHub Pages: every push to `main` builds the app and publishes it to https://madhubolla2205.github.io/goal-prep-planner/ (`.github/workflows/deploy-pages.yml`). The hosted copy has no server, so it always uses the built-in rules, and each visitor's plans stay in their own browser.
 
+Android app: the same app wrapped with [Capacitor](https://capacitorjs.com/) (`android/`, `capacitor.config.ts`). Every push to `main` builds an APK and publishes it on the Releases page (`.github/workflows/android.yml`); the newest is always at https://github.com/madhubolla2205/goal-prep-planner/releases/latest/download/goal-prep-planner.apk. Releases are signed with the key in the repository secrets `ANDROID_KEYSTORE_BASE64` and `ANDROID_KEYSTORE_PASSWORD` (key alias `upload`), so each one installs as an update; never commit the key. To build locally with Android Studio: `npm run android`, then open `android/`.
+
 ## Code map
 
 - `src/lib/planner.ts`: scheduling engine, pace, readiness and streak (pure functions, tested in `planner.test.ts`)

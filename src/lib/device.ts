@@ -1,6 +1,11 @@
 // What the app can do with the browser it runs in: install to the home
 // screen, work offline, and keep its data from being cleared.
 
+import { Capacitor } from '@capacitor/core';
+
+/** True inside the Android app, where the app is already installed and offline. */
+export const isNativeApp = () => Capacitor.isNativePlatform();
+
 /** Chrome's install prompt event; not in the DOM typings yet. */
 interface InstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -27,7 +32,8 @@ export function setUpDevice(): void {
     notify();
   });
   // The service worker exists only in the build; in dev it would cache stale modules.
-  if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  // The Android app ships every file inside it, so it needs none.
+  if (import.meta.env.PROD && !isNativeApp() && 'serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`).catch(() => {
         // Without it the app still works, just not offline.
@@ -56,7 +62,7 @@ export async function install(): Promise<boolean> {
 
 /** True when the app is running from the home screen rather than a browser tab. */
 export function isInstalled(): boolean {
-  return matchMedia('(display-mode: standalone)').matches || (navigator as { standalone?: boolean }).standalone === true;
+  return isNativeApp() || matchMedia('(display-mode: standalone)').matches || (navigator as { standalone?: boolean }).standalone === true;
 }
 
 /** iPhone and iPad have no install prompt; people add the app from the Share menu. */
@@ -71,6 +77,8 @@ export function isIOS(): boolean {
  * data is protected.
  */
 export async function protectStorage(): Promise<boolean> {
+  // The Android app's data stays until the app is uninstalled or its data cleared.
+  if (isNativeApp()) return true;
   if (!navigator.storage?.persist) return false;
   try {
     return (await navigator.storage.persisted()) || (await navigator.storage.persist());

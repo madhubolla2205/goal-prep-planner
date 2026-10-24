@@ -1,7 +1,7 @@
 import { useRef, useState, useSyncExternalStore } from 'react';
 import { backupFileName, makeBackup, mergeBackup, parseBackup } from '../lib/backup';
 import { daysBetween, type ISODate } from '../lib/dates';
-import { canInstall, install, isInstalled, isIOS, subscribeInstall } from '../lib/device';
+import { canInstall, install, isInstalled, isIOS, isNativeApp, subscribeInstall } from '../lib/device';
 import { loadLastBackup, saveLastBackup, type AppState } from '../lib/storage';
 import { Icon } from './Icon';
 
@@ -77,11 +77,19 @@ export function YourData({ state, today, protectedData, onRestore }: Props) {
   const installable = useSyncExternalStore(subscribeInstall, canInstall);
   const [installed, setInstalled] = useState(isInstalled);
   const [lastBackup, setLastBackup] = useState(loadLastBackup);
-  const canShare = typeof navigator.canShare === 'function' && navigator.canShare({ files: [backupFile(state, today)] });
+  const native = isNativeApp();
+  const canShare = !native && typeof navigator.canShare === 'function' && navigator.canShare({ files: [backupFile(state, today)] });
 
   const saved = () => {
     saveLastBackup(today);
     setLastBackup(today);
+  };
+
+  const shareFromApp = async () => {
+    const text = JSON.stringify(makeBackup(state), null, 2);
+    // Loaded only in the Android app, so the website doesn't carry the plugins.
+    const { shareTextFile } = await import('../lib/nativeShare');
+    if (await shareTextFile(backupFileName(today), text, 'Goal Prep Planner backup')) saved();
   };
 
   const download = () => {
@@ -109,7 +117,7 @@ export function YourData({ state, today, protectedData, onRestore }: Props) {
         <h3 className="with-icon"><span className="icon-badge"><Icon name="shield" size={16} /></span>Your data</h3>
       </div>
       <p className="muted small">
-        Your plans and progress are saved only in this browser on this device. There's no account, so a backup file is how you keep a copy or carry on somewhere else.
+        Your plans and progress are saved only {native ? 'in this app' : 'in this browser'} on this device. There's no account, so a backup file is how you keep a copy or carry on somewhere else.
       </p>
 
       <section className="data-row">
@@ -118,7 +126,7 @@ export function YourData({ state, today, protectedData, onRestore }: Props) {
           <p className="muted small">{lastBackupText(lastBackup, today)} Open the file on another phone or computer with "Restore from file" to continue there.</p>
         </div>
         <div className="data-actions">
-          <button type="button" onClick={download}><Icon name="download" size={16} /> Save backup</button>
+          <button type="button" onClick={native ? shareFromApp : download}><Icon name="download" size={16} /> Save backup</button>
           {canShare && <button type="button" className="ghost" onClick={share}>Send to another device</button>}
           <RestoreButton state={state} onRestore={onRestore} />
         </div>
@@ -128,7 +136,9 @@ export function YourData({ state, today, protectedData, onRestore }: Props) {
         <div>
           <strong>Install as an app</strong>
           <p className="muted small">
-            {installed
+            {native
+              ? 'You\'re using the Android app. It works without internet.'
+              : installed
               ? 'Installed. Open it from your home screen; it works without internet too.'
               : installable
                 ? 'Add it to your home screen or desktop. It opens like an app and works without internet.'
@@ -148,6 +158,8 @@ export function YourData({ state, today, protectedData, onRestore }: Props) {
         <Icon name={protectedData ? 'check' : 'shield'} size={15} />
         {protectedData === null
           ? 'Checking whether this browser keeps your data…'
+          : native
+            ? 'Your data stays in the app until you uninstall it, so save a backup before you do.'
           : protectedData
             ? "This browser won't clear your data to free up space."
             : 'This browser may clear data from sites you haven\'t opened in a while. Installing the app helps; a backup keeps you safe either way.'}
