@@ -24,6 +24,8 @@ npm test
 
 Production: `npm run build`, then `ANTHROPIC_API_KEY=... npm start` serves the app and the API on port 8787 (`PORT` to change). Without a key the server still runs and the app uses its built-in rules. Each Claude-generated plan is one request to `claude-opus-5-5`.
 
+GitHub Pages: every push to `main` builds the app and publishes it to https://madhubolla2205.github.io/goal-prep-planner/ (`.github/workflows/deploy-pages.yml`). The hosted copy has no server, so it always uses the built-in rules, and each visitor's plans stay in their own browser.
+
 ## Code map
 
 - `src/lib/planner.ts`: scheduling engine, pace, readiness and streak (pure functions, tested in `planner.test.ts`)
