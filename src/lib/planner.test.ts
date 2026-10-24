@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { addDays } from './dates';
-import { buildPlan, overallReadiness, pace, skillReadiness, streak, studyDays } from './planner';
+import { buildPlan, overallReadiness, pace, remainingMinutes, schedule, skillReadiness, streak, studyDays } from './planner';
+import { focusSessions, strategyProfile } from './strategy';
 import type { Goal } from './types';
 
 const TODAY = '2026-11-02'; // a Monday
@@ -69,7 +70,7 @@ describe('buildPlan', () => {
 
   it('limits how many skills share a day', () => {
     for (const day of buildPlan(goal({ dailyMinutes: 60 }), TODAY)) {
-      if (day.phase === 'learn') expect(day.blocks).toHaveLength(1);
+      if (day.phase === 'learn') expect(day.blocks.filter((b) => b.kind === 'learn').length).toBeLessThanOrEqual(1);
     }
   });
 
@@ -148,5 +149,90 @@ describe('variety', () => {
     const week = buildPlan(goal(), TODAY).slice(0, 7);
     const touched = new Set(week.flatMap((d) => d.blocks.map((b) => b.skillId)));
     expect(touched.size).toBe(3);
+  });
+});
+
+describe('strategies', () => {
+  // A 60-day goal with some background (weighted confidence about 50%).
+  const strong = (overrides: Partial<Goal> = {}) =>
+    goal({
+      targetDate: addDays(TODAY, 59),
+      skills: [
+        { id: 'a', name: 'Algorithms', weight: 5, estimatedHours: 40, confidence: 50 },
+        { id: 'b', name: 'Behavioral', weight: 2, estimatedHours: 8, confidence: 60 },
+        { id: 'c', name: 'Design', weight: 4, estimatedHours: 20, confidence: 40 },
+      ],
+      ...overrides,
+    });
+
+  it('picks the scenario from time left and starting level', () => {
+    expect(strategyProfile(goal(), 10)).toMatchObject({ horizon: 'sprint', level: 'beginner', diagnostic: false });
+    expect(strategyProfile(strong(), 60)).toMatchObject({ horizon: 'standard', level: 'intermediate', diagnostic: true });
+    expect(strategyProfile(strong({ type: 'exam' }), 120)).toMatchObject({ horizon: 'long', mockMinutes: 180 });
+  });
+
+  it('opens with a diagnostic mock unless starting from scratch', () => {
+    expect(buildPlan(strong(), TODAY)[0].blocks[0].kind).toBe('mock');
+    expect(buildPlan(goal(), TODAY)[0].blocks.some((b) => b.kind === 'mock')).toBe(false);
+  });
+
+  it('follows every mock with an analysis session', () => {
+    const plan = buildPlan(strong(), TODAY);
+    plan.forEach((day, i) => {
+      if (day.blocks.some((b) => b.kind === 'mock')) {
+        expect(plan[i + 1].blocks.some((b) => b.kind === 'analysis')).toBe(true);
+      }
+    });
+  });
+
+  it('ramps mocks up toward the date and tapers at the end', () => {
+    const plan = buildPlan(strong(), TODAY);
+    const mocks = plan.map((d, i) => (d.blocks.some((b) => b.kind === 'mock') ? i : -1)).filter((i) => i >= 0);
+    const half = plan.length / 2;
+    expect(mocks.filter((i) => i >= half).length).toBeGreaterThan(mocks.filter((i) => i < half).length);
+    expect(mocks.every((i) => i < plan.length - 2)).toBe(true);
+    const last = plan.at(-1)!;
+    expect(last.blocks.reduce((s, b) => s + b.minutes, 0)).toBeLessThanOrEqual(60);
+  });
+
+  it('keeps mock dates fixed as the days go by', () => {
+    const g = strong();
+    const mocksFrom = (today: string) =>
+      buildPlan(g, today).filter((d) => d.blocks.some((b) => b.kind === 'mock')).map((d) => d.date);
+    const later = addDays(TODAY, 10);
+    expect(mocksFrom(later)).toEqual(mocksFrom(TODAY).filter((d) => d >= later));
+  });
+
+  it('brings finished skills back as spaced reviews', () => {
+    const g = goal({ log: [{ id: '1', date: addDays(TODAY, -1), skillId: 'b', minutes: 5 * 60 }] });
+    const plan = buildPlan(g, TODAY);
+    const reviews = plan.filter((d) => d.phase === 'learn' && d.blocks.some((b) => b.kind === 'review' && b.skillId === 'b'));
+    expect(reviews.length).toBeGreaterThanOrEqual(2);
+    // Gaps between reviews grow.
+    const idx = reviews.map((d) => plan.indexOf(d));
+    expect(idx[2] - idx[1]).toBeGreaterThan(idx[1] - idx[0]);
+  });
+
+  it('does not count review time against new material', () => {
+    const g = goal({ log: [{ id: '1', date: addDays(TODAY, -1), skillId: 'a', minutes: 60, kind: 'review' }] });
+    expect(remainingMinutes(g, g.skills[0], TODAY)).toBe(20 * 60);
+  });
+
+  it('revises the weakest skills first', () => {
+    const first = buildPlan(goal(), TODAY).find((d) => d.phase === 'revise')!;
+    const revised = first.blocks.filter((b) => b.kind === 'revise').map((b) => b.skillId);
+    expect(revised).toContain('a');
+  });
+
+  it('keeps the revision phase start fixed as the days go by', () => {
+    const g = strong({ dailyMinutes: 60 });
+    const firstRevision = (today: string) => buildPlan(g, today).find((d) => d.phase === 'revise')!.date;
+    expect(firstRevision(TODAY)).toBe(schedule(g).revisionStart);
+    expect(firstRevision(addDays(TODAY, 15))).toBe(schedule(g).revisionStart);
+  });
+
+  it('splits long blocks into focus sessions', () => {
+    expect(focusSessions(100, 50)).toEqual({ count: 2, minutes: 50 });
+    expect(focusSessions(30, 25)).toBeNull();
   });
 });

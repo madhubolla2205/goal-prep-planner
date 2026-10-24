@@ -122,7 +122,15 @@ legend { font-size: 0.9rem; color: var(--text-2); margin-bottom: 6px; }
 .task-name { font-weight: 550; }
 .task-actions { display: flex; gap: 6px; }
 .kind { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-2); border: 1px solid var(--border); border-radius: 6px; padding: 1px 6px; margin-right: 6px; }
-.kind-mock { border-color: var(--accent); }
+.kind-mock, .kind-analysis { border-color: var(--accent); }
+.kind-review { border-style: dashed; }
+.task-hint { flex-basis: 100%; }
+
+.strategy-summary { margin: 0; }
+.strategy-card details { margin-top: 10px; }
+.strategy-card summary { cursor: pointer; color: var(--accent); }
+.strategy-list { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.strategy-list a { color: var(--text-2); }
 
 .inline-form { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .inline-form input:not([type='number']) { flex: 1; }

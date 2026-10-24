@@ -20,6 +20,8 @@ export interface LogEntry {
   skillId: string | null;
   minutes: number;
   note?: string;
+  /** Which kind of planned block the time was for; older entries have none. */
+  kind?: BlockKind;
 }
 
 export interface Goal {
@@ -39,7 +41,12 @@ export interface Goal {
   source?: 'ai' | 'rules' | 'manual';
 }
 
-export type BlockKind = 'learn' | 'revise' | 'mock';
+/**
+ * learn: new material · review: spaced recall of a skill studied earlier ·
+ * revise: practice on weak skills in the revision phase · mock: a full
+ * practice test or mock interview · analysis: going through a mock's mistakes.
+ */
+export type BlockKind = 'learn' | 'review' | 'revise' | 'mock' | 'analysis';
 
 export interface PlannedBlock {
   skillId: string | null;

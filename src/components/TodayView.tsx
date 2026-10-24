@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react';
 import { formatDay, type ISODate } from '../lib/dates';
-import { buildPlan, minutesOnDay } from '../lib/planner';
+import { buildPlan, entryKind, minutesOnDay, schedule } from '../lib/planner';
 import { newId } from '../lib/storage';
-import type { Goal } from '../lib/types';
-import { KIND_LABEL, formatMinutes, skillName } from './labels';
+import { focusSessions } from '../lib/strategy';
+import type { BlockKind, Goal, PlannedBlock } from '../lib/types';
+import { KIND_LABEL, blockName, formatMinutes, kindHint, skillName } from './labels';
 
 interface Props {
   goal: Goal;
@@ -14,6 +15,7 @@ interface Props {
 
 export function TodayView({ goal, today, onChange, onAdjust }: Props) {
   const plan = useMemo(() => buildPlan(goal, today), [goal, today]);
+  const focusMinutes = useMemo(() => schedule(goal).profile.focusMinutes, [goal]);
   const day = plan[0]?.date === today ? plan[0] : undefined;
   const todaysLog = goal.log.filter((e) => e.date === today);
   const loggedToday = minutesOnDay(goal, today);
@@ -21,15 +23,15 @@ export function TodayView({ goal, today, onChange, onAdjust }: Props) {
   const [extraSkill, setExtraSkill] = useState<string>(goal.skills[0]?.id ?? 'mock');
   const [extraMinutes, setExtraMinutes] = useState(30);
 
-  const log = (skillId: string | null, minutes: number) => {
+  const log = (skillId: string | null, minutes: number, kind?: BlockKind) => {
     if (minutes <= 0) return;
-    onChange({ ...goal, log: [...goal.log, { id: newId(), date: today, skillId, minutes }] });
+    onChange({ ...goal, log: [...goal.log, { id: newId(), date: today, skillId, minutes, kind }] });
   };
 
   const undo = (id: string) => onChange({ ...goal, log: goal.log.filter((e) => e.id !== id) });
 
-  const loggedFor = (skillId: string | null) =>
-    todaysLog.filter((e) => e.skillId === skillId).reduce((s, e) => s + e.minutes, 0);
+  const loggedFor = (b: PlannedBlock) =>
+    todaysLog.filter((e) => e.skillId === b.skillId && entryKind(e) === b.kind).reduce((s, e) => s + e.minutes, 0);
 
   const planned = day?.blocks.reduce((s, b) => s + b.minutes, 0) ?? 0;
 
@@ -65,18 +67,23 @@ export function TodayView({ goal, today, onChange, onAdjust }: Props) {
         {day && day.blocks.length > 0 && (
           <ul className="tasks">
             {day.blocks.map((b) => {
-              const done = loggedFor(b.skillId);
+              const done = loggedFor(b);
               const complete = done >= b.minutes;
+              const sessions = b.kind === 'mock' ? null : focusSessions(b.minutes, focusMinutes);
               return (
                 <li key={`${b.kind}-${b.skillId}`} className={complete ? 'complete' : ''}>
                   <div className="task-main">
                     <span className={`kind kind-${b.kind}`}>{KIND_LABEL[b.kind]}</span>
-                    <span className="task-name">{skillName(goal, b.skillId)}</span>
+                    <span className="task-name">{blockName(goal, b)}</span>
                     <span className="muted small">{formatMinutes(Math.min(done, b.minutes))} / {formatMinutes(b.minutes)}</span>
+                    <span className="task-hint muted small">
+                      {kindHint(goal, b.kind)}
+                      {sessions && <> · {sessions.count} × {sessions.minutes} min focus sessions</>}
+                    </span>
                   </div>
                   <div className="task-actions">
-                    <button className="ghost small" onClick={() => log(b.skillId, 15)}>+15 min</button>
-                    <button className="small" disabled={complete} onClick={() => log(b.skillId, b.minutes - done)}>
+                    <button className="ghost small" onClick={() => log(b.skillId, 15, b.kind)}>+15 min</button>
+                    <button className="small" disabled={complete} onClick={() => log(b.skillId, b.minutes - done, b.kind)}>
                       {complete ? 'Done' : 'Mark done'}
                     </button>
                   </div>
@@ -100,7 +107,7 @@ export function TodayView({ goal, today, onChange, onAdjust }: Props) {
             {goal.skills.map((s) => (
               <option key={s.id} value={s.id}>{s.name}</option>
             ))}
-            <option value="mock">Mock test</option>
+            <option value="mock">{skillName(goal, null)}</option>
           </select>
           <input aria-label="Minutes" type="number" min={5} step={5} value={extraMinutes} onChange={(e) => setExtraMinutes(Number(e.target.value))} />
           <span className="muted">min</span>
@@ -111,7 +118,10 @@ export function TodayView({ goal, today, onChange, onAdjust }: Props) {
           <ul className="log-list">
             {todaysLog.map((e) => (
               <li key={e.id}>
-                <span>{skillName(goal, e.skillId)}</span>
+                <span>
+                  {blockName(goal, { skillId: e.skillId, minutes: e.minutes, kind: entryKind(e) })}
+                  {e.skillId !== null && entryKind(e) !== 'learn' && <span className="muted"> · {KIND_LABEL[entryKind(e)].toLowerCase()}</span>}
+                </span>
                 <span className="muted">{formatMinutes(e.minutes)}</span>
                 <button className="link" onClick={() => undo(e.id)}>Undo</button>
               </li>

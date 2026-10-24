@@ -1,4 +1,5 @@
 import { addDays, daysBetween, weekday, type ISODate } from './dates';
+import { LEARNING_SHARE } from './planner';
 import { newId } from './storage';
 import { TEMPLATES } from './templates';
 import type { Goal, GoalType } from './types';
@@ -150,7 +151,7 @@ export function learningHours(targetDate: ISODate, dailyMinutes: number, restDay
   const span = Math.max(0, daysBetween(today, targetDate) + 1);
   let days = 0;
   for (let i = 0; i < span; i++) if (!restDays.includes(weekday(addDays(today, i)))) days++;
-  return (days * 0.85 * dailyMinutes) / 60;
+  return (days * LEARNING_SHARE * dailyMinutes) / 60;
 }
 
 /**

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { addDays, daysBetween, weekday, type ISODate } from '../lib/dates';
+import { LEARNING_SHARE } from '../lib/planner';
 import { newId } from '../lib/storage';
 import { TEMPLATES } from '../lib/templates';
 import type { Goal, GoalType } from '../lib/types';
@@ -34,8 +35,8 @@ export function GoalForm({ today, onCreate, onCancel }: Props) {
   const neededHours = template.skills.reduce((sum, sk) => sum + sk.estimatedHours, 0);
   const span = Math.max(0, daysBetween(today, targetDate) + 1);
   const studyDayCount = Array.from({ length: span }, (_, i) => addDays(today, i)).filter((d) => !restDays.includes(weekday(d))).length;
-  // Roughly 85% of study days go to new material; the rest is revision.
-  const availableHours = Math.round(studyDayCount * hours * 0.85);
+  // The rest of the time goes to revision, spaced review and mocks.
+  const availableHours = Math.round(studyDayCount * hours * LEARNING_SHARE);
 
   const valid = name.trim() !== '' && targetDate > today && hours > 0 && restDays.length < 7;
 
