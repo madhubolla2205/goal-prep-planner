@@ -28,6 +28,9 @@ jobs:
       - run: npm run build
         env:
           BASE_PATH: /goal-prep-planner/
+          # Visitor counter: the site code from goatcounter.com, saved as a
+          # repository variable. Left empty, the site has no counter.
+          GOATCOUNTER_CODE: ${{ vars.GOATCOUNTER_CODE }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
