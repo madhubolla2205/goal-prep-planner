@@ -12,6 +12,7 @@ Plan and track preparation for a goal: an exam (GATE, CAT, …) or an interview 
 - **Share a plan.** Plan tab → "Share this plan" makes a link (or a WhatsApp message) with the plan's skills, date and hours, never progress. The plan travels inside the link after `#`, so no server is involved; whoever opens it can adjust the date and add it.
 - **Calendar.** Plan tab → add a repeating study event to Google Calendar, or download every planned study day as an `.ics` file with a 10-minute alert.
 - **Daily reminder.** In the Android app, a notification at the time you pick saying what's planned that day (skipped once the day is done; rescheduled two weeks ahead whenever the app is opened or progress is logged). On the website, which can't notify while closed, the same card offers the Android app and a repeating Google Calendar reminder.
+- **Role models.** Add people who reached a goal like yours (name, a line of theirs, an optional photo) or a note to your future self. Today shows one each day, in turn; the Android reminder leads with their words; finishing the day's plan, or every study day of the week, brings up a small celebration with them. A "why I'm doing this" note comes up on Today after two or more missed study days. Photos are shrunk to a small square so they fit in the browser's storage and backups. Set them up from the invitation on Today or under Adjust.
 - **Progress picture.** Progress tab → a 1080×1350 picture of readiness, streak, days left and hours studied for WhatsApp status or Instagram.
 - **Languages.** English, हिन्दी, বাংলা, मराठी, తెలుగు, தமிழ், ಕನ್ನಡ for the main screens (home, today, plan, progress, new plan and the features above); other screens stay in English for now. The sentence box still needs English. Fonts for each script load from Google Fonts. Translations live in `src/lib/translations.ts`; corrections from native speakers are welcome.
 - **Adjust.** Each goal is a list of skills with an importance (1–5), an estimated number of hours and your confidence (0–100%). All of it is editable.
@@ -53,6 +54,7 @@ Android app: the same app wrapped with [Capacitor](https://capacitorjs.com/) (`a
 - `src/lib/shareLink.ts`: plan links and turning a starter or shared plan into a goal; `src/lib/sharing.ts`: share, copy and save in the browser and the Android app
 - `src/lib/calendar.ts`: `.ics` export and Google Calendar links; `src/lib/reminders.ts` and `src/lib/nativeReminders.ts`: the daily reminder
 - `src/lib/progressImage.ts`: draws the progress picture
+- `src/lib/motivation.ts`: role model of the day, missed study days, week finished, reminder line and photo shrinking (tested in `motivation.test.ts`)
 - `src/lib/i18n.ts`, `src/lib/translations.ts`: languages
 - `src/lib/backup.ts`: backup file format, validation and merging (tested in `backup.test.ts`)
 - `src/lib/device.ts`, `pwa/sw.js`, `public/manifest.webmanifest`: install prompt, persistent storage and the offline service worker; `vite.config.ts` fills the worker with the build's file list

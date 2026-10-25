@@ -3,9 +3,11 @@ import { formatDay, type ISODate } from '../lib/dates';
 import { buildPlan, entryKind, minutesOnDay, schedule } from '../lib/planner';
 import { newId } from '../lib/storage';
 import { t } from '../lib/i18n';
+import { finishesWeek } from '../lib/motivation';
 import { focusSessions } from '../lib/strategy';
 import type { BlockKind, Goal, PlannedBlock } from '../lib/types';
 import { Icon } from './Icon';
+import { Celebration, TodayMotivation } from './Motivation';
 import { KIND_ICON, kindLabel, blockName, formatMinutes, kindHint, skillName } from './labels';
 import { QuickRevision } from './QuickRevision';
 
@@ -26,10 +28,18 @@ export function TodayView({ goal, today, onChange, onAdjust, onOpenNotes }: Prop
 
   const [extraSkill, setExtraSkill] = useState<string>(goal.skills[0]?.id ?? 'mock');
   const [extraMinutes, setExtraMinutes] = useState(30);
+  const [celebrate, setCelebrate] = useState<null | 'day' | 'week'>(null);
+
+  const planned = day?.blocks.reduce((s, b) => s + b.minutes, 0) ?? 0;
 
   const log = (skillId: string | null, minutes: number, kind?: BlockKind) => {
     if (minutes <= 0) return;
-    onChange({ ...goal, log: [...goal.log, { id: newId(), date: today, skillId, minutes, kind }] });
+    const next = { ...goal, log: [...goal.log, { id: newId(), date: today, skillId, minutes, kind }] };
+    onChange(next);
+    // The moment the day's plan is met, once.
+    if (planned > 0 && loggedToday < planned && loggedToday + minutes >= planned) {
+      setCelebrate(finishesWeek(next, today) ? 'week' : 'day');
+    }
   };
 
   const undo = (id: string) => onChange({ ...goal, log: goal.log.filter((e) => e.id !== id) });
@@ -37,12 +47,14 @@ export function TodayView({ goal, today, onChange, onAdjust, onOpenNotes }: Prop
   const loggedFor = (b: PlannedBlock) =>
     todaysLog.filter((e) => e.skillId === b.skillId && entryKind(e) === b.kind).reduce((s, e) => s + e.minutes, 0);
 
-  const planned = day?.blocks.reduce((s, b) => s + b.minutes, 0) ?? 0;
-
   const showIntro = goal.prompt && goal.log.length === 0;
 
   return (
     <div className="stack">
+      {celebrate && (
+        <Celebration goal={goal} today={today} week={celebrate === 'week'} minutes={formatMinutes(loggedToday)} onClose={() => setCelebrate(null)} />
+      )}
+      <TodayMotivation goal={goal} today={today} onChange={onChange} />
       {showIntro && (
         <div className="intro">
           <p>
