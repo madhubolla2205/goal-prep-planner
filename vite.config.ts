@@ -15,8 +15,8 @@ function serviceWorker(): Plugin {
     apply: 'build',
     generateBundle(_, bundle) {
       const publicFiles = readdirSync('public')
-      // The plan pages and sitemap are for search engines, not the offline app.
-      const files = [...Object.keys(bundle), ...publicFiles].filter((f) => !f.endsWith('.map') && !f.startsWith('plans/') && f !== 'sitemap.xml').sort()
+      // The plan pages, privacy policy and sitemap are web pages, not part of the offline app.
+      const files = [...Object.keys(bundle), ...publicFiles].filter((f) => !f.endsWith('.map') && !f.startsWith('plans/') && !f.startsWith('privacy/') && f !== 'sitemap.xml').sort()
       const hash = createHash('sha256')
       for (const f of files) hash.update(f)
       for (const f of publicFiles) hash.update(readFileSync(`public/${f}`))

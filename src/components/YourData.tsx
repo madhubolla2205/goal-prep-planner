@@ -2,6 +2,7 @@ import { useRef, useState, useSyncExternalStore } from 'react';
 import { backupFileName, makeBackup, mergeBackup, parseBackup } from '../lib/backup';
 import { daysBetween, type ISODate } from '../lib/dates';
 import { canInstall, install, isInstalled, isIOS, isNativeApp, subscribeInstall } from '../lib/device';
+import { SITE_URL } from '../lib/shareLink';
 import { loadLastBackup, saveLastBackup, type AppState } from '../lib/storage';
 import { Icon } from './Icon';
 
@@ -117,7 +118,8 @@ export function YourData({ state, today, protectedData, onRestore }: Props) {
         <h3 className="with-icon"><span className="icon-badge"><Icon name="shield" size={16} /></span>Your data</h3>
       </div>
       <p className="muted small">
-        Your plans and progress are saved only {native ? 'in this app' : 'in this browser'} on this device. There's no account, so a backup file is how you keep a copy or carry on somewhere else.
+        Your plans and progress are saved only {native ? 'in this app' : 'in this browser'} on this device. There's no account, so a backup file is how you keep a copy or carry on somewhere else.{' '}
+        <a href={`${SITE_URL}privacy/`} target="_blank" rel="noreferrer">Privacy policy</a>
       </p>
 
       <section className="data-row">
