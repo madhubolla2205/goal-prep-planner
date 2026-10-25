@@ -28,6 +28,8 @@ jobs:
       - run: npm run build
         env:
           BASE_PATH: /goal-prep-planner/
+          # The site's address: turns on the ready-made plan pages and the sitemap.
+          SITE_URL: https://madhubolla2205.github.io/goal-prep-planner/
           # Visitor counter: the site code from goatcounter.com. The code is
           # public (it is in the page), so it lives here; a repository
           # variable GOATCOUNTER_CODE overrides it.

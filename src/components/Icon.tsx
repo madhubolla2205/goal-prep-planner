@@ -4,7 +4,8 @@ export type IconName =
   | PathIcon
   | 'check' | 'flame' | 'target' | 'sun' | 'calendar' | 'bars' | 'sliders' | 'bulb' | 'star'
   | 'plus' | 'trash' | 'repeat' | 'timer' | 'search' | 'pen' | 'spark' | 'flag'
-  | 'download' | 'upload' | 'shield' | 'phone';
+  | 'download' | 'upload' | 'shield' | 'phone' | 'grid'
+  | 'globe' | 'share' | 'bell' | 'link' | 'image' | 'chat';
 
 const PATHS: Record<IconName, string> = {
   code: 'M8 6l-6 6 6 6M16 6l6 6-6 6',
@@ -36,6 +37,13 @@ const PATHS: Record<IconName, string> = {
   upload: 'M12 15V3M7 8l5-5 5 5M4 21h16',
   shield: 'M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z',
   phone: 'M8 2h8a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zM11 18h2',
+  grid: 'M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z',
+  globe: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z',
+  share: 'M18 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM6 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM18 22a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM8.6 13.5l6.8 4M15.4 6.5l-6.8 4',
+  bell: 'M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0',
+  link: 'M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7',
+  image: 'M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zM8.5 10a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM21 15l-5-5L5 21',
+  chat: 'M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.6A8.4 8.4 0 1 1 21 11.5z',
 };
 
 export function Icon({ name, size = 18, className }: { name: IconName; size?: number; className?: string }) {

@@ -1,3 +1,4 @@
+import { t, type Key } from '../lib/i18n';
 import type { IconName } from './Icon';
 import type { BlockKind, Goal, PlannedBlock } from '../lib/types';
 
@@ -12,13 +13,16 @@ export function blockName(goal: Goal, block: PlannedBlock): string {
   return skillName(goal, block.skillId);
 }
 
-export const KIND_LABEL: Record<BlockKind, string> = {
-  learn: 'Study',
-  review: 'Review',
-  revise: 'Revise',
-  mock: 'Mock',
-  analysis: 'Analysis',
+const KIND_KEY: Record<BlockKind, Key> = {
+  learn: 'kindLearn',
+  review: 'kindReview',
+  revise: 'kindRevise',
+  mock: 'kindMock',
+  analysis: 'kindAnalysis',
 };
+
+/** The block kind's name in the current language. */
+export const kindLabel = (kind: BlockKind) => t(KIND_KEY[kind]);
 
 export const KIND_ICON: Record<BlockKind, IconName> = {
   learn: 'book',

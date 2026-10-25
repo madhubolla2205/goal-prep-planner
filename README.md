@@ -7,6 +7,13 @@ Plan and track preparation for a goal: an exam (GATE, CAT, …) or an interview 
 ## What it does
 
 - **Just ask.** Type what you're preparing for in one sentence, e.g. "Amazon SDE interview in 6 weeks, 2 hours a day, weekends off". The app works out the goal, date, daily hours, rest days and the skills to cover, and builds the plan. With an Anthropic API key, Claude breaks the goal down for that specific company or exam; without one, built-in rules handle common exams and roles. Estimates are scaled to fit the time you have. Prefer forms? "Set everything up yourself" still offers templates and every option.
+- **All your plans in one place.** The home page lists every plan as a card: active ones (soonest target first) and past ones, with readiness, pace, today's progress and streak. Tap a card to open that plan, or "New plan" to start another. With more than one plan the app opens on this page; "All plans" or the logo brings you back.
+- **Ready-made plans.** 14 one-tap plans (GATE CSE, CAT, UPSC Prelims, SSC CGL, IBPS PO, NEET UG, JEE Main, GRE, TCS NQT, Amazon SDE, software engineer, data analyst, data scientist, product manager). Pick one, set your date and daily hours, done. Each also has its own web page at `/plans/<id>/` (plus `/plans/` and `sitemap.xml`) so search engines can find it; the page's button opens the app with that plan ready.
+- **Share a plan.** Plan tab → "Share this plan" makes a link (or a WhatsApp message) with the plan's skills, date and hours, never progress. The plan travels inside the link after `#`, so no server is involved; whoever opens it can adjust the date and add it.
+- **Calendar.** Plan tab → add a repeating study event to Google Calendar, or download every planned study day as an `.ics` file with a 10-minute alert.
+- **Daily reminder.** In the Android app, a notification at the time you pick saying what's planned that day (skipped once the day is done; rescheduled two weeks ahead whenever the app is opened or progress is logged). On the website, which can't notify while closed, the same card offers the Android app and a repeating Google Calendar reminder.
+- **Progress picture.** Progress tab → a 1080×1350 picture of readiness, streak, days left and hours studied for WhatsApp status or Instagram.
+- **Languages.** English, हिन्दी, বাংলা, मराठी, తెలుగు, தமிழ், ಕನ್ನಡ for the main screens (home, today, plan, progress, new plan and the features above); other screens stay in English for now. The sentence box still needs English. Fonts for each script load from Google Fonts. Translations live in `src/lib/translations.ts`; corrections from native speakers are welcome.
 - **Adjust.** Each goal is a list of skills with an importance (1–5), an estimated number of hours and your confidence (0–100%). All of it is editable.
 - **Schedule.** A day-by-day plan from today to the target date, in 15-minute blocks. Important, low-confidence skills come first, skills rotate so none goes untouched for long, and the last ~15% of study days are reserved for revision and mock tests.
 - **Adaptive.** The plan is rebuilt every day from what you actually logged, so missed or extra study reshapes every later day. Time logged today doesn't change today's checklist.
@@ -41,9 +48,19 @@ Android app: the same app wrapped with [Capacitor](https://capacitorjs.com/) (`a
 - `server/`: the `/api/plan` endpoint (Anthropic SDK with structured outputs) and a static file server for production
 - `src/lib/templates.ts`: starting skill lists per goal type
 - `src/lib/types.ts`, `src/lib/dates.ts`, `src/lib/storage.ts`: model, date helpers, persistence
+- `src/lib/plans.ts`: per-plan summary and active/past grouping for the home page (tested in `plans.test.ts`)
+- `src/lib/starters.ts`: ready-made plans; `seo-pages.ts` builds their web pages and the sitemap (only when `SITE_URL` is set, as in the Pages workflow)
+- `src/lib/shareLink.ts`: plan links and turning a starter or shared plan into a goal; `src/lib/sharing.ts`: share, copy and save in the browser and the Android app
+- `src/lib/calendar.ts`: `.ics` export and Google Calendar links; `src/lib/reminders.ts` and `src/lib/nativeReminders.ts`: the daily reminder
+- `src/lib/progressImage.ts`: draws the progress picture
+- `src/lib/i18n.ts`, `src/lib/translations.ts`: languages
 - `src/lib/backup.ts`: backup file format, validation and merging (tested in `backup.test.ts`)
 - `src/lib/device.ts`, `pwa/sw.js`, `public/manifest.webmanifest`: install prompt, persistent storage and the offline service worker; `vite.config.ts` fills the worker with the build's file list
-- `src/components/`: the "What are you preparing for?" screen, Today, Plan, Dashboard, Adjust and the manual goal form
+- `src/components/`: the "What are you preparing for?" screen, the home page of all plans, Today, Plan, Dashboard, Adjust and the manual goal form
+
+## Getting found on Google
+
+The plan pages are listed in https://madhubolla2205.github.io/goal-prep-planner/sitemap.xml. A project site on GitHub Pages can't put a `robots.txt` at the domain root, so submit the sitemap once in [Google Search Console](https://search.google.com/search-console) (free): add the site as a URL-prefix property, verify it with the HTML-tag method, then add the sitemap under Sitemaps.
 
 ## Usage numbers
 

@@ -1,17 +1,18 @@
 import { useMemo } from 'react';
 import { formatDay, type ISODate } from '../lib/dates';
+import { t, type Key } from '../lib/i18n';
 import { overallReadiness, pace, recentActivity, remainingMinutes, skillReadiness, streak } from '../lib/planner';
 import type { Goal } from '../lib/types';
 import { Icon } from './Icon';
 import { formatMinutes } from './labels';
 
-const PACE_LABEL = {
-  'on-track': { icon: '✓', label: 'On track', tone: 'good' },
-  tight: { icon: '!', label: 'Tight', tone: 'warning' },
-  behind: { icon: '!', label: 'Behind', tone: 'critical' },
-  done: { icon: '✓', label: 'All study done', tone: 'good' },
-  overdue: { icon: '×', label: 'Target passed', tone: 'critical' },
-} as const;
+const PACE_LABEL: Record<string, { icon: string; label: Key; tone: string }> = {
+  'on-track': { icon: '✓', label: 'paceOnTrack', tone: 'good' },
+  tight: { icon: '!', label: 'paceTight', tone: 'warning' },
+  behind: { icon: '!', label: 'paceBehind', tone: 'critical' },
+  done: { icon: '✓', label: 'paceDone', tone: 'good' },
+  overdue: { icon: '×', label: 'paceOverdue', tone: 'critical' },
+};
 
 const ACTIVITY_DAYS = 14;
 
@@ -32,14 +33,14 @@ export function Dashboard({ goal, today }: { goal: Goal; today: ISODate }) {
     <div className="stack">
       <div className="tiles">
         <div className="tile">
-          <span className="tile-label"><span className="icon-badge"><Icon name="target" size={14} /></span>Readiness</span>
+          <span className="tile-label"><span className="icon-badge"><Icon name="target" size={14} /></span>{t('readiness')}</span>
           <span className="tile-value">{readiness}%</span>
           <span className="muted small">Weighted by skill importance</span>
         </div>
         <div className="tile">
-          <span className="tile-label"><span className="icon-badge"><Icon name="timer" size={14} /></span>Pace</span>
+          <span className="tile-label"><span className="icon-badge"><Icon name="timer" size={14} /></span>{t('pace')}</span>
           <span className={`tile-value status status-${status.tone}`}>
-            <span aria-hidden="true" className="status-icon">{status.icon}</span>{status.label}
+            <span aria-hidden="true" className="status-icon">{status.icon}</span>{t(status.label)}
           </span>
           <span className="muted small">
             {p.status === 'done' || p.status === 'overdue'
@@ -48,12 +49,12 @@ export function Dashboard({ goal, today }: { goal: Goal; today: ISODate }) {
           </span>
         </div>
         <div className="tile">
-          <span className="tile-label"><span className="icon-badge"><Icon name="flame" size={14} /></span>Streak</span>
+          <span className="tile-label"><span className="icon-badge"><Icon name="flame" size={14} /></span>{t('streak')}</span>
           <span className="tile-value">{days} {days === 1 ? 'day' : 'days'}</span>
           <span className="muted small">Rest days don't break it</span>
         </div>
         <div className="tile">
-          <span className="tile-label"><span className="icon-badge"><Icon name="calendar" size={14} /></span>Last 7 days</span>
+          <span className="tile-label"><span className="icon-badge"><Icon name="calendar" size={14} /></span>{t('last7Days')}</span>
           <span className="tile-value">{formatMinutes(lastWeek)}</span>
           <span className="muted small">{formatMinutes(p.remainingMinutes)} of study left</span>
         </div>
@@ -61,7 +62,7 @@ export function Dashboard({ goal, today }: { goal: Goal; today: ISODate }) {
 
       <div className="card">
         <div className="card-head">
-          <h3>Study time, last {ACTIVITY_DAYS} days</h3>
+          <h3>{t('studyTime14')}</h3>
           <span className="legend"><span className="legend-line" /> Daily target</span>
         </div>
         <div className="bars" style={{ ['--target-frac' as string]: goal.dailyMinutes / peak }}>
@@ -72,7 +73,7 @@ export function Dashboard({ goal, today }: { goal: Goal; today: ISODate }) {
               </div>
               <span className="tip">{formatDay(d.date)}<br /><strong>{formatMinutes(d.minutes)}</strong></span>
               <span className="bar-label">
-                <span className="label-long">{d.date === today ? 'Today' : formatDay(d.date).split(',')[0]}</span>
+                <span className="label-long">{d.date === today ? t('heroToday') : formatDay(d.date).split(',')[0]}</span>
                 <span className="label-short">{formatDay(d.date).charAt(0)}</span>
               </span>
             </div>
@@ -83,7 +84,7 @@ export function Dashboard({ goal, today }: { goal: Goal; today: ISODate }) {
 
       <div className="card">
         <div className="card-head">
-          <h3>Readiness by skill</h3>
+          <h3>{t('readinessBySkill')}</h3>
           <span className="muted small">Weakest first</span>
         </div>
         {skills.length === 0 && <p className="empty">Add skills to see readiness.</p>}
