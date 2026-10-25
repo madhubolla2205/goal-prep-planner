@@ -1,0 +1,43 @@
+# Dependabot watches the libraries this app uses and opens a pull request when
+# one of them has a published security fix. Version updates are turned off
+# (open-pull-requests-limit: 0), so only security fixes come through.
+#
+# Security pull requests also need two switches in the repository settings:
+# Settings > Code security > Dependabot alerts and Dependabot security updates.
+#
+# Fixes that only change the patch or minor version are grouped into one pull
+# request per ecosystem, and .github/workflows/dependabot-auto-merge.yml merges
+# it and ships a new release once the build passes. A fix that needs a new
+# major version comes as its own pull request and waits for a person.
+
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 0
+    groups:
+      npm-security:
+        applies-to: security-updates
+        update-types: [minor, patch]
+
+  - package-ecosystem: gradle
+    directory: /android
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 0
+    groups:
+      gradle-security:
+        applies-to: security-updates
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 0
+    groups:
+      actions-security:
+        applies-to: security-updates
+        update-types: [minor, patch]

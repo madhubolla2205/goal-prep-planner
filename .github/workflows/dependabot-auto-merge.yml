@@ -1,0 +1,87 @@
+name: Merge Dependabot security fixes
+
+# Runs after "Build Android app" finishes on a pull request. That build runs
+# the tests, builds the web app and builds the APK, so a green run means the
+# fix doesn't break anything we check.
+#
+# For a pull request from Dependabot that only changes patch or minor versions,
+# this merges it into main and then starts the release workflows (new APK on
+# the Releases page, new website on GitHub Pages). They have to be started by
+# hand here: a merge made by a workflow doesn't trigger push workflows itself.
+#
+# A pull request that needs a new major version gets the "needs-review" label
+# and is left for a person to check and merge.
+
+on:
+  workflow_run:
+    workflows: [Build Android app]
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+concurrency:
+  group: dependabot-auto-merge
+  cancel-in-progress: false
+
+jobs:
+  merge:
+    if: >-
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.actor.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+      HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+    steps:
+      # Nothing from the pull request is checked out or run here; this job
+      # only reads the pull request's details and merges it.
+      - name: Find the pull request
+        id: pr
+        run: |
+          pr=$(gh pr list --head "$HEAD_BRANCH" --state open --json number,author,headRefOid \
+            --jq ".[] | select((.author.login == \"app/dependabot\" or .author.login == \"dependabot[bot]\") and .headRefOid == \"$HEAD_SHA\") | .number")
+          if [ -z "$pr" ]; then
+            echo "No open Dependabot pull request at $HEAD_SHA, so nothing to merge."
+          fi
+          echo "number=$pr" >> "$GITHUB_OUTPUT"
+
+      # Dependabot writes "update-type: version-update:semver-..." into its
+      # commit message for every library it changes.
+      - name: Check the size of the update
+        id: kind
+        if: steps.pr.outputs.number != ''
+        run: |
+          messages=$(gh pr view "${{ steps.pr.outputs.number }}" --json commits --jq '.commits[].messageBody')
+          echo "$messages"
+          if echo "$messages" | grep -q 'semver-major'; then
+            echo "major=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "major=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Leave major updates for a person
+        if: steps.kind.outputs.major == 'true'
+        run: |
+          pr=${{ steps.pr.outputs.number }}
+          labels=$(gh pr view "$pr" --json labels --jq '.labels[].name')
+          if ! echo "$labels" | grep -qx 'needs-review'; then
+            gh label create needs-review --color d93f0b --description "Check and merge by hand" --force
+            gh pr edit "$pr" --add-label needs-review
+            gh pr comment "$pr" --body "This security fix needs a new major version of a library, which can change how it works, so it isn't merged automatically. The build passed. Please check the app and merge it by hand; merging it publishes a new release."
+          fi
+
+      - name: Merge
+        if: steps.kind.outputs.major == 'false'
+        run: gh pr merge "${{ steps.pr.outputs.number }}" --squash --delete-branch --match-head-commit "$HEAD_SHA"
+
+      - name: Release the new version
+        if: steps.kind.outputs.major == 'false'
+        run: |
+          gh workflow run android.yml --ref main
+          gh workflow run deploy-pages.yml --ref main
