@@ -8,6 +8,7 @@ import { Home } from './components/Home';
 import { Icon, type IconName } from './components/Icon';
 import { formatMinutes } from './components/labels';
 import { LanguagePicker } from './components/LanguagePicker';
+import { MotivationEditor } from './components/Motivation';
 import { NotesView } from './components/NotesView';
 import { PlanOfferView } from './components/PlanOfferView';
 import { PlanView } from './components/PlanView';
@@ -20,6 +21,7 @@ import { YourData } from './components/YourData';
 import { todayISO, type ISODate } from './lib/dates';
 import { isNativeApp, protectStorage } from './lib/device';
 import { getLang, setLang, t, type Key, type Lang } from './lib/i18n';
+import { modelName, reminderLine, roleModelFor } from './lib/motivation';
 import { loadReminder, saveReminder, upcomingReminders, type ReminderSettings } from './lib/reminders';
 import { loadScriptFont } from './lib/scriptFont';
 import { decodePlan, offerFromStarter, planCodeFromHash, starterIdFromHash, type PlanOffer } from './lib/shareLink';
@@ -114,12 +116,16 @@ export default function App() {
     if (!isNativeApp()) return;
     const timer = setTimeout(() => {
       void import('./lib/nativeReminders').then(({ scheduleReminders }) =>
-        scheduleReminders(upcomingReminders(state.goals, todayISO()), reminder.enabled ? reminder.time : null, (day) => ({
-          title: t('reminderNotifTitle'),
-          body: day.goals.length === 1
-            ? t('reminderNotifOne', { time: formatMinutes(day.minutes), name: day.goals[0].name })
-            : t('reminderNotifMany', { time: formatMinutes(day.minutes), n: day.goals.length }),
-        })),
+        scheduleReminders(upcomingReminders(state.goals, todayISO()), reminder.enabled ? reminder.time : null, (day) => {
+          // The day's role model, from the first plan that has one, leads the notification.
+          const model = day.goals.map((g) => roleModelFor(g, day.date)).find((m) => m !== null);
+          return {
+            title: model ? reminderLine(model, modelName(model)) : t('reminderNotifTitle'),
+            body: day.goals.length === 1
+              ? t('reminderNotifOne', { time: formatMinutes(day.minutes), name: day.goals[0].name })
+              : t('reminderNotifMany', { time: formatMinutes(day.minutes), n: day.goals.length }),
+          };
+        }),
       );
     }, 1500);
     return () => clearTimeout(timer);
@@ -275,6 +281,7 @@ export default function App() {
         {tab === 'adjust' && (
           <div className="stack">
             <SkillsView goal={goal} onChange={updateGoal} onDelete={() => deleteGoal(goal.id)} />
+            <MotivationEditor key={goal.id} goal={goal} onChange={updateGoal} />
             <ReminderCard goals={state.goals} today={today} settings={reminder} onChange={setReminder} />
             <YourData state={state} today={today} protectedData={protectedData} onRestore={restore} />
           </div>

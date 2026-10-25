@@ -43,6 +43,23 @@ export interface Goal {
   notes?: Note[];
   /** Look of the goal's pages; picked from the goal itself when unset. */
   theme?: ThemeId;
+  /** People who keep the person going, shown on Today and in reminders; older goals have none. */
+  roleModels?: RoleModel[];
+  /** Why the goal matters to the person, shown after a few missed study days. */
+  why?: string;
+  /** The person passed on adding a role model, so Today stops asking. */
+  motivationDismissed?: boolean;
+}
+
+/** Someone the person looks up to, or their own future self. */
+export interface RoleModel {
+  id: string;
+  name: string;
+  quote: string;
+  /** A small square JPEG as a data URL, kept with the plan and its backups. */
+  photo?: string;
+  /** A note to the person's future self rather than a real person. */
+  self?: boolean;
 }
 
 export type ThemeId = 'code' | 'data' | 'engineering' | 'aptitude' | 'civil' | 'medical' | 'exam' | 'interview';
