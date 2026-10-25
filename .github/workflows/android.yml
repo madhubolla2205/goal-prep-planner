@@ -4,6 +4,9 @@ name: Build Android app
 # always points at the newest one:
 # https://github.com/madhubolla2205/goal-prep-planner/releases/latest/download/goal-prep-planner.apk
 # Pull requests only build it, to check that it still builds.
+#
+# With the signing key set, it also builds goal-prep-planner.aab, the Android
+# App Bundle that Google Play wants. Upload that file in the Play Console.
 
 on:
   push:
@@ -46,7 +49,7 @@ jobs:
       # signed the same way and installs as an update over the last one.
       # Without it the APK gets a throwaway debug key, so people would have to
       # uninstall the old version (losing its data) before installing a new one.
-      - name: Build signed APK
+      - name: Build signed APK and App Bundle
         if: ${{ env.HAS_KEY == 'true' }}
         env:
           KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -55,8 +58,9 @@ jobs:
         working-directory: android
         run: |
           echo "$KEYSTORE" | base64 --decode > "$RUNNER_TEMP/release.jks"
-          ANDROID_KEYSTORE_FILE="$RUNNER_TEMP/release.jks" ./gradlew assembleRelease
+          ANDROID_KEYSTORE_FILE="$RUNNER_TEMP/release.jks" ./gradlew assembleRelease bundleRelease
           cp app/build/outputs/apk/release/app-release.apk "$RUNNER_TEMP/goal-prep-planner.apk"
+          cp app/build/outputs/bundle/release/app-release.aab "$RUNNER_TEMP/goal-prep-planner.aab"
       - name: Build debug-signed APK
         if: ${{ env.HAS_KEY != 'true' }}
         working-directory: android
@@ -69,6 +73,11 @@ jobs:
         with:
           name: goal-prep-planner-apk
           path: ${{ runner.temp }}/goal-prep-planner.apk
+      - uses: actions/upload-artifact@v4
+        if: ${{ env.HAS_KEY == 'true' }}
+        with:
+          name: goal-prep-planner-aab
+          path: ${{ runner.temp }}/goal-prep-planner.aab
 
       - name: Publish release
         if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
@@ -83,8 +92,12 @@ jobs:
           3. Tap **Install**, then open **Goal Prep Planner** from your home screen.
 
           To update later, download the newest APK the same way and install it over this one. Your plans stay.
+
+          `goal-prep-planner.aab` is the same build for uploading to Google Play.
           NOTES
-          gh release create "android-v$VERSION_NAME" "$RUNNER_TEMP/goal-prep-planner.apk" \
+          files=("$RUNNER_TEMP/goal-prep-planner.apk")
+          [ -f "$RUNNER_TEMP/goal-prep-planner.aab" ] && files+=("$RUNNER_TEMP/goal-prep-planner.aab")
+          gh release create "android-v$VERSION_NAME" "${files[@]}" \
             --target "$GITHUB_SHA" \
             --title "Android app $VERSION_NAME" \
             --notes-file "$RUNNER_TEMP/notes.md" \

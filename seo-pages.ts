@@ -1,6 +1,6 @@
-// One web page per ready-made plan (STARTERS), plus an index page and a
-// sitemap, emitted into the GitHub Pages build. They give search engines
-// something to find for "<exam> preparation plan"; each page's button opens
+// One web page per ready-made plan (STARTERS), plus an index page, a sitemap
+// and the privacy policy, emitted into the GitHub Pages build. They give search
+// engines something to find for "<exam> preparation plan"; each page's button opens
 // the app with that plan ready to add.
 
 import type { Plugin } from 'vite'
@@ -67,7 +67,7 @@ function page(opts: { title: string; description: string; canonical: string; roo
 <main>
 <a class="brand" href="${opts.root}"><img src="${opts.root}favicon.svg" alt="" width="32" height="32" /> Goal Prep Planner</a>
 ${opts.body}
-<footer><p>Goal Prep Planner is free, needs no sign-up, and keeps your plan and progress on your own device. It plans and tracks your preparation; it does not include study material. Also on <a href="https://github.com/madhubolla2205/goal-prep-planner/releases/latest/download/goal-prep-planner.apk">Android</a>.</p></footer>
+<footer><p>Goal Prep Planner is free, needs no sign-up, and keeps your plan and progress on your own device. It plans and tracks your preparation; it does not include study material. Also on <a href="https://github.com/madhubolla2205/goal-prep-planner/releases/latest/download/goal-prep-planner.apk">Android</a>. <a href="${opts.root}privacy/">Privacy policy</a>.</p></footer>
 </main>
 </body>
 </html>
@@ -149,6 +149,58 @@ ${list}
   })
 }
 
+/** The privacy policy that the Google Play listing links to. */
+function privacyPage(site: string): string {
+  return page({
+    title: 'Privacy policy: Goal Prep Planner',
+    description: 'Goal Prep Planner keeps your plans and progress on your own device. No account, no ads, no personal data collected.',
+    canonical: `${site}privacy/`,
+    root: '../',
+    body: `
+<div class="band">
+<h1>Privacy policy</h1>
+<p>Your plans and progress stay on your own device. Goal Prep Planner has no accounts, no ads and no server that stores your data.</p>
+</div>
+<section>
+<h2>Who this covers</h2>
+<p>This policy covers the Goal Prep Planner Android app and the website at <a href="${site}">${esc(site)}</a>. Both are made by madhubolla2205 and are free.</p>
+<p>Last updated: 25 October 2026.</p>
+</section>
+<section>
+<h2>What stays on your device</h2>
+<p>Everything you enter (your goal, exam or interview date, subjects, study log, notes and settings) is saved only in the app's storage on your phone, or in your browser for the website. It is never sent to us or anyone else. Uninstalling the app, or clearing the website's data, deletes it.</p>
+<p>You can save a backup file from <strong>Your data</strong> and restore it later. That file goes only where you choose to save or send it.</p>
+</section>
+<section>
+<h2>What we collect</h2>
+<p><strong>In the Android app: nothing.</strong> The app has no analytics, no tracking, no advertising and no crash reporting.</p>
+<p><strong>On the website:</strong> we count visits with <a href="https://www.goatcounter.com/">GoatCounter</a>, which records the page visited, the referring site, browser type, screen size and country. It sets no cookies, does not track you across sites and stores no personal data. See <a href="https://www.goatcounter.com/help/privacy">GoatCounter's privacy policy</a>.</p>
+</section>
+<section>
+<h2>Other services the app contacts</h2>
+<ul class="how">
+<li><strong>Google Fonts.</strong> The app and website load their typeface from Google Fonts, so Google receives a normal web request (including your IP address) when fonts load. See <a href="https://developers.google.com/fonts/faq/privacy">Google Fonts' privacy notes</a>.</li>
+<li><strong>Things you choose to open.</strong> Sharing a plan, adding a study day to Google Calendar, sending to WhatsApp or opening a study tip's source only happens when you tap it, and that service's own privacy policy applies.</li>
+</ul>
+</section>
+<section>
+<h2>Permissions</h2>
+<ul class="how">
+<li><strong>Notifications:</strong> only if you turn on daily study reminders. Reminders are scheduled on your phone; nothing is sent from a server.</li>
+<li><strong>Internet:</strong> to load fonts and open links you tap.</li>
+</ul>
+</section>
+<section>
+<h2>Children</h2>
+<p>The app is meant for students preparing for exams and interviews. It collects no personal data from anyone, including children.</p>
+</section>
+<section>
+<h2>Changes and contact</h2>
+<p>If this policy changes, the new version will be posted on this page with a new date. Questions? Open an issue at <a href="https://github.com/madhubolla2205/goal-prep-planner/issues">github.com/madhubolla2205/goal-prep-planner/issues</a>.</p>
+</section>`,
+  })
+}
+
 /** Emits the pages; only for the website build, where `site` is its address. */
 export function seoPages(site: string | undefined): Plugin {
   return {
@@ -157,9 +209,10 @@ export function seoPages(site: string | undefined): Plugin {
     generateBundle() {
       if (!site) return
       const today = new Date().toISOString().slice(0, 10)
-      const urls = [site, `${site}plans/`, ...STARTERS.map((s) => `${site}plans/${s.id}/`)]
+      const urls = [site, `${site}plans/`, `${site}privacy/`, ...STARTERS.map((s) => `${site}plans/${s.id}/`)]
       for (const s of STARTERS) this.emitFile({ type: 'asset', fileName: `plans/${s.id}/index.html`, source: starterPage(s, site) })
       this.emitFile({ type: 'asset', fileName: 'plans/index.html', source: indexPage(site) })
+      this.emitFile({ type: 'asset', fileName: 'privacy/index.html', source: privacyPage(site) })
       this.emitFile({
         type: 'asset',
         fileName: 'sitemap.xml',
