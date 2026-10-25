@@ -66,6 +66,10 @@ The plan pages are listed in https://madhubolla2205.github.io/goal-prep-planner/
 
 Both counters are free. The badge at the top counts downloads of every APK on the Releases page (people who download but never install are counted too). Visitors to the site are counted by [GoatCounter](https://www.goatcounter.com/), which sets no cookies and stores no personal data. Visitor numbers are at https://goal-prep-planner.goatcounter.com (the site code is set in `.github/workflows/deploy-pages.yml`; a repository variable `GOATCOUNTER_CODE` overrides it). Local builds and the Android app are not counted.
 
+## Security fixes
+
+Dependabot (free) watches the npm, Gradle and GitHub Actions libraries for published vulnerabilities and opens a pull request with the fixed version (`.github/dependabot.yml`). When the Android build passes on that pull request (tests, web build and APK), `.github/workflows/dependabot-auto-merge.yml` merges it and starts a new APK release and website deploy. A fix that needs a new major version gets the `needs-review` label instead; merge it by hand after checking the app. Turn on **Dependabot alerts** and **Dependabot security updates** under Settings > Code security for any of this to run.
+
 ## Next steps
 
 Reminders, a nudge to back up, and mock-test score tracking.
