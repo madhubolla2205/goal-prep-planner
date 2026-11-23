@@ -116,6 +116,29 @@ describe('readiness', () => {
     expect(skillReadiness(g, g.skills[0])).toBe(76);
   });
 
+  it('starts a new plan at 0% until study is logged or confidence is rated', () => {
+    const g = goal({
+      skills: [
+        { id: 'a', name: 'A', weight: 5, estimatedHours: 20, confidence: 30, confidenceRated: false },
+        { id: 'b', name: 'B', weight: 2, estimatedHours: 5, confidence: 30, confidenceRated: false },
+      ],
+    });
+    expect(overallReadiness(g)).toBe(0);
+    g.skills[0] = { ...g.skills[0], confidence: 50, confidenceRated: true };
+    expect(skillReadiness(g, g.skills[0])).toBe(15); // 0.3 * 50
+  });
+
+  it('counts confidence on older plans only when it differs from the default', () => {
+    const g = goal({
+      skills: [
+        { id: 'a', name: 'A', weight: 3, estimatedHours: 10, confidence: 30 },
+        { id: 'b', name: 'B', weight: 3, estimatedHours: 10, confidence: 60 },
+      ],
+    });
+    expect(skillReadiness(g, g.skills[0])).toBe(0);
+    expect(skillReadiness(g, g.skills[1])).toBe(18);
+  });
+
   it('weights overall readiness by skill importance', () => {
     const g = goal();
     expect(overallReadiness(g)).toBeGreaterThan(0);

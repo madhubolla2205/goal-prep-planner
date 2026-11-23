@@ -28,7 +28,7 @@ export function SkillsView({ goal, onChange, onDelete }: Props) {
     if (!newName.trim()) return;
     onChange({
       ...goal,
-      skills: [...goal.skills, { id: newId(), name: newName.trim(), weight: 3, estimatedHours: 10, confidence: 30 }],
+      skills: [...goal.skills, { id: newId(), name: newName.trim(), weight: 3, estimatedHours: 10, confidence: 30, confidenceRated: false }],
     });
     setNewName('');
   };
@@ -36,7 +36,7 @@ export function SkillsView({ goal, onChange, onDelete }: Props) {
   return (
     <div className="stack">
       <p className="muted">
-        Importance and confidence decide what gets scheduled first. Update your confidence as you go, and the plan adjusts.
+        Importance and confidence decide what gets scheduled first. Update your confidence as you go, and the plan adjusts. Readiness counts your confidence once you rate it here.
       </p>
       <div className="card">
         <ul className="skill-editor">
@@ -61,7 +61,7 @@ export function SkillsView({ goal, onChange, onDelete }: Props) {
                 </label>
                 <label className="grow">
                   Confidence: {s.confidence}%
-                  <input type="range" min={0} max={100} step={5} value={s.confidence} onChange={(e) => updateSkill(s.id, { confidence: Number(e.target.value) })} />
+                  <input type="range" min={0} max={100} step={5} value={s.confidence} onChange={(e) => updateSkill(s.id, { confidence: Number(e.target.value), confidenceRated: true })} />
                 </label>
               </div>
               <span className="muted small">Logged so far: {formatMinutes(minutesLogged(goal, s.id))}</span>
