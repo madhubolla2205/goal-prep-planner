@@ -176,6 +176,7 @@ export function goalFromDraft(draft: GoalDraft, today: ISODate, prompt?: string)
       weight: s.weight,
       estimatedHours: Math.max(1, Math.round(s.estimatedHours * scale)),
       confidence: s.confidence ?? 30,
+      confidenceRated: false,
     })),
     log: [],
     prompt,

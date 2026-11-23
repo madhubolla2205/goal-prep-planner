@@ -11,6 +11,12 @@ export interface Skill {
   estimatedHours: number;
   /** Self-rated confidence, 0 to 100. */
   confidence: number;
+  /**
+   * True once the learner has rated their confidence themselves. Until then
+   * `confidence` is only a starting guess used for ordering, and it does not
+   * count toward readiness. Missing on plans saved before this field existed.
+   */
+  confidenceRated?: boolean;
 }
 
 export interface LogEntry {

@@ -51,7 +51,7 @@ export function GoalForm({ today, onCreate, onCancel }: Props) {
       targetDate,
       dailyMinutes: Math.round(hours * 60),
       restDays,
-      skills: template.skills.map((s) => ({ ...s, id: newId(), confidence: 30 })),
+      skills: template.skills.map((s) => ({ ...s, id: newId(), confidence: 30, confidenceRated: false })),
       log: [],
       source: 'manual',
     });

@@ -344,14 +344,28 @@ export function pace(goal: Goal, today: ISODate): Pace {
   return { remainingMinutes: remaining, learnDaysLeft, requiredDailyMinutes: required, status };
 }
 
+/** Confidence the app starts every new skill at before the learner rates it. */
+export const DEFAULT_CONFIDENCE = 30;
+
+/**
+ * The confidence that counts toward readiness: only what the learner rated
+ * themselves. Plans saved before `confidenceRated` existed count any value
+ * other than the default, since that can only have come from the learner.
+ */
+export function ratedConfidence(skill: Skill): number {
+  const rated = skill.confidenceRated ?? skill.confidence !== DEFAULT_CONFIDENCE;
+  return rated ? skill.confidence : 0;
+}
+
 /**
  * Readiness of one skill, 0 to 100: mostly time put in against the estimate,
- * tempered by how confident the learner says they feel.
+ * tempered by how confident the learner says they feel. A new plan with no
+ * study logged and no confidence rated starts at 0%.
  */
 export function skillReadiness(goal: Goal, skill: Skill): number {
   const target = skill.estimatedHours * 60;
   const coverage = target === 0 ? 1 : Math.min(1, minutesLearned(goal, skill.id) / target);
-  return Math.round(100 * (0.7 * coverage + 0.3 * (skill.confidence / 100)));
+  return Math.round(100 * (0.7 * coverage + 0.3 * (ratedConfidence(skill) / 100)));
 }
 
 export function overallReadiness(goal: Goal): number {
