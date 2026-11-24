@@ -164,7 +164,7 @@ function privacyPage(site: string): string {
 <section>
 <h2>Who this covers</h2>
 <p>This policy covers the Goal Prep Planner Android app and the website at <a href="${site}">${esc(site)}</a>. Both are made by madhubolla2205 and are free.</p>
-<p>Last updated: 25 October 2026.</p>
+<p>Last updated: 24 November 2026.</p>
 </section>
 <section>
 <h2>What stays on your device</h2>
@@ -180,6 +180,7 @@ function privacyPage(site: string): string {
 <h2>Other services the app contacts</h2>
 <ul class="how">
 <li><strong>Google Fonts.</strong> The app and website load their typeface from Google Fonts, so Google receives a normal web request (including your IP address) when fonts load. See <a href="https://developers.google.com/fonts/faq/privacy">Google Fonts' privacy notes</a>.</li>
+<li><strong>Feedback you choose to send.</strong> <strong>Send feedback</strong> opens an email in your own mail app, already filled in with the app version, your phone model and Android version, the app's language and how many plans you have, so problems can be fixed. You can read and change it before sending, and nothing is sent unless you send it. Private feedback on Google Play goes through Google's own service.</li>
 <li><strong>Things you choose to open.</strong> Sharing a plan, adding a study day to Google Calendar, sending to WhatsApp or opening a study tip's source only happens when you tap it, and that service's own privacy policy applies.</li>
 </ul>
 </section>

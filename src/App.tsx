@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { AskGoal } from './components/AskGoal';
 import { CalendarCard } from './components/CalendarCard';
 import { Dashboard } from './components/Dashboard';
+import { FEEDBACK_ID, FeedbackCard, FeedbackNudge } from './components/Feedback';
 import { GoalForm } from './components/GoalForm';
 import { Hero } from './components/Hero';
 import { Home } from './components/Home';
@@ -179,6 +180,19 @@ export default function App() {
 
   const picker = <LanguagePicker lang={lang} onChange={changeLang} />;
 
+  // The header's Feedback button: to the feedback card, on Adjust when a plan is open.
+  const [feedbackJump, setFeedbackJump] = useState(0);
+  useEffect(() => {
+    if (feedbackJump) document.getElementById(FEEDBACK_ID)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [feedbackJump]);
+  const openFeedback = () => {
+    if (view === 'plan') setTab('adjust');
+    setFeedbackJump((n) => n + 1);
+  };
+  const feedbackButton = (
+    <button className="ghost" onClick={openFeedback} aria-label={t('feedback')}><Icon name="chat" size={16} /> <span className="hide-sm">{t('feedback')}</span></button>
+  );
+
   if (offer) {
     return (
       <div className="app" style={themeStyle(WELCOME_THEME)}>
@@ -223,11 +237,12 @@ export default function App() {
       <div className="app" style={themeStyle(WELCOME_THEME)}>
         <header className="topbar">
           <Brand />
-          <div className="goal-switch">{picker}</div>
+          <div className="goal-switch">{picker}{feedbackButton}</div>
         </header>
         <main>
           <Home goals={state.goals} today={today} onOpen={openGoal} onNew={() => setCreating('ask')}>
             <ReminderCard goals={state.goals} today={today} settings={reminder} onChange={setReminder} />
+            <FeedbackCard plans={state.goals.length} />
           </Home>
         </main>
       </div>
@@ -242,6 +257,7 @@ export default function App() {
         <Brand onHome={goHome} />
         <div className="goal-switch">
           {picker}
+          {feedbackButton}
           <button className="ghost" onClick={goHome} aria-label={t('allPlans')}><Icon name="grid" size={16} /> <span className="hide-sm">{t('allPlans')}</span></button>
           <button className="ghost" onClick={() => setCreating('ask')} aria-label={t('newPlan')}><Icon name="plus" size={16} /> <span className="hide-sm">{t('newPlan')}</span></button>
         </div>
@@ -259,6 +275,7 @@ export default function App() {
       </nav>
 
       <main>
+        {tab === 'today' && <FeedbackNudge goals={state.goals} today={today} />}
         {tab === 'today' && (
           <TodayView goal={goal} today={today} onChange={updateGoal} onAdjust={() => setTab('adjust')} onOpenNotes={() => setTab('notes')} />
         )}
@@ -284,6 +301,7 @@ export default function App() {
             <MotivationEditor key={goal.id} goal={goal} onChange={updateGoal} />
             <ReminderCard goals={state.goals} today={today} settings={reminder} onChange={setReminder} />
             <YourData state={state} today={today} protectedData={protectedData} onRestore={restore} />
+            <FeedbackCard plans={state.goals.length} />
           </div>
         )}
       </main>

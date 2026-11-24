@@ -53,6 +53,8 @@ export default defineConfig({
   // GitHub Pages serves the app from /goal-prep-planner/; the deploy workflow
   // sets BASE_PATH. Local dev and `npm start` keep serving from the root.
   base: process.env.BASE_PATH ?? '/',
+  // The Android release workflow sets VERSION_NAME; feedback emails mention it.
+  define: { __APP_VERSION__: JSON.stringify(process.env.VERSION_NAME ?? '') },
   // The plan pages come before the service worker so it can leave them out of its list.
   plugins: [react(), seoPages(process.env.SITE_URL), serviceWorker(), visitorCounter()],
   server: {
