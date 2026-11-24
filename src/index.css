@@ -62,6 +62,13 @@
   --grad: linear-gradient(135deg, var(--t1), var(--t2));
 }
 
+:root {
+  /* The Android app's WebView sets --safe-area-inset-*; browsers give env(). */
+  --safe-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
+  --safe-right: var(--safe-area-inset-right, env(safe-area-inset-right, 0px));
+  --safe-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
+  --safe-left: var(--safe-area-inset-left, env(safe-area-inset-left, 0px));
+}
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); }
 h1, h2, h3 { margin: 0; line-height: 1.2; letter-spacing: -0.01em; }
@@ -71,7 +78,9 @@ h3 { font-size: 1.05rem; font-weight: 700; }
 
 .app {
   min-height: 100vh;
-  padding-bottom: 56px;
+  /* Space for the phone's status bar, navigation bar and camera cutout. The app
+     draws under them (edge to edge), so content starts inside the safe area. */
+  padding: var(--safe-top) var(--safe-right) calc(56px + var(--safe-bottom)) var(--safe-left);
   background:
     radial-gradient(900px 420px at 0% -10%, color-mix(in oklab, var(--t1) 16%, transparent), transparent 70%),
     radial-gradient(800px 420px at 100% -5%, color-mix(in oklab, var(--t2) 13%, transparent), transparent 70%),
@@ -548,7 +557,7 @@ legend { font-size: 0.9rem; color: var(--text-2); margin-bottom: 6px; }
 .why-field { padding-top: 12px; border-top: 1px solid var(--border); font-weight: 600; }
 .why-field .muted { font-weight: 400; }
 
-.celebrate-backdrop { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 16px; background: color-mix(in oklab, #000 45%, transparent); animation: fade-in 0.2s ease-out; }
+.celebrate-backdrop { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: calc(16px + var(--safe-top)) calc(16px + var(--safe-right)) calc(16px + var(--safe-bottom)) calc(16px + var(--safe-left)); background: color-mix(in oklab, #000 45%, transparent); animation: fade-in 0.2s ease-out; }
 .celebrate {
   position: relative; overflow: hidden; width: min(100%, 380px); display: flex; flex-direction: column; align-items: center; gap: 10px;
   padding: 28px 22px 22px; text-align: center; border-radius: 24px; background: var(--surface); color: var(--text);
@@ -583,3 +592,9 @@ legend { font-size: 0.9rem; color: var(--text-2); margin-bottom: 6px; }
   .model-banner { padding: 14px; gap: 12px; }
   .model-banner blockquote { font-size: 0.98rem; }
 }
+
+/* Feedback */
+.feedback-nudge { margin-bottom: 16px; }
+.feedback-nudge .data-actions { align-items: center; }
+.feedback-nudge p.with-icon { flex-wrap: nowrap; align-items: flex-start; }
+.feedback-nudge p.with-icon svg { flex: none; margin-top: 3px; }

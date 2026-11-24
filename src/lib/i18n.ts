@@ -144,6 +144,16 @@ export const EN = {
   reminderNotifOne: 'Today: {time} for {name}',
   reminderNotifMany: 'Today: {time} across {n} plans',
 
+  // Feedback
+  feedback: 'Feedback',
+  feedbackTitle: 'Send feedback',
+  feedbackHint: "Tell us what works and what gets in the way. Every message is read, and the next update is built from them.",
+  feedbackEmail: 'Email feedback',
+  feedbackPlay: 'Private feedback on Google Play',
+  feedbackPlayHint: "On the app's Google Play page, write in the private feedback box. Only the developer sees it.",
+  feedbackAsk: 'How is the app working for you? A line or two helps make the next update better.',
+  feedbackLater: 'Not now',
+
   // Progress picture
   pictureTitle: 'Share your progress',
   pictureHint: 'A picture of your streak and readiness for WhatsApp status or Instagram. Nothing else from your plan is in it.',
