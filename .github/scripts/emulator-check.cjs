@@ -113,7 +113,9 @@ const STATE = { goals: [plan('g1', 'GATE CSE', 'exam', 60), plan('g2', 'Amazon S
     check('Feedback card on Adjust', await page.locator('#feedback').isVisible());
 
     // Tapping the Play link must leave the app for the browser or Play Store.
-    await page.locator('#feedback a').first().click();
+    // Clicked from the page: the app hands the link to Android, so the page never
+    // navigates and a Playwright click would wait for that navigation.
+    await page.evaluate(() => document.querySelector('#feedback a').click());
     await pause(4000);
     const focus = (await device.shell('dumpsys window | grep -E "mCurrentFocus|mFocusedApp"')).toString();
     check('Google Play link opens outside the app', !focus.includes(`${PKG}/`) || /chrome|browser|vending/i.test(focus), focus.trim().split('\n')[0]);

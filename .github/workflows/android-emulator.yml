@@ -69,7 +69,7 @@ jobs:
       - name: Save screenshots to the emulator-screens branch
         if: always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
         run: |
-          [ -d emulator-screens ] || exit 0
+          ls emulator-screens/* >/dev/null 2>&1 || exit 0
           dir="api${{ matrix.api-level }}"
           for i in 1 2 3 4; do
             rm -rf "$RUNNER_TEMP/screens" && git clone -q --depth 1 --branch emulator-screens "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" "$RUNNER_TEMP/screens" 2>/dev/null \
