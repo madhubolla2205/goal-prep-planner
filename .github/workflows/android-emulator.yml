@@ -1,0 +1,63 @@
+name: Check Android app on emulators
+
+# Installs the debug app on an Android 15 and an Android 10 emulator, opens
+# the main screens and saves screenshots. Fails if a title bar appears above
+# the app or the header's Feedback button is off screen.
+
+on:
+  pull_request:
+    paths: ['android/**', 'src/**', 'index.html', 'capacitor.config.ts', 'package*.json', '.github/**']
+  workflow_dispatch:
+
+concurrency:
+  group: emulator-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  emulator:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        api-level: [35, 29]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+      - run: npm ci
+      - run: npm run build
+      - run: npx cap sync android
+      - name: Build debug APK
+        working-directory: android
+        run: ./gradlew assembleDebug
+      - run: npm install --no-save playwright@1.63.0
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Run checks on the emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        env:
+          API_LEVEL: ${{ matrix.api-level }}
+          OUT: emulator-screens
+        with:
+          api-level: ${{ matrix.api-level }}
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          script: adb install -r android/app/build/outputs/apk/debug/app-debug.apk && node .github/scripts/emulator-check.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: emulator-screens-api${{ matrix.api-level }}
+          path: emulator-screens
