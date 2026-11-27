@@ -42,8 +42,9 @@ const STATE = { goals: [plan('g1', 'GATE CSE', 'exam', 60), plan('g2', 'Amazon S
     await device.shell('uiautomator dump /sdcard/ui.xml');
     const xml = (await device.shell('cat /sdcard/ui.xml')).toString();
     // AppCompat always has an "action_bar_root" container; a real title bar adds
-    // an action bar view or a native TextView with the app's name.
-    const bar = /:id\/(action_bar|action_bar_container|title)"/.test(xml) || /class="android.widget.TextView"[^>]*text="Goal Prep/.test(xml) || /text="Goal Prep[^"]*"[^>]*class="android.widget.TextView"/.test(xml);
+    // an action bar view.
+    // (The web page's own heading also shows up as a TextView, so text alone can't tell.)
+    const bar = /:id\/(action_bar|action_bar_container|title)"/.test(xml);
     check(`no title bar above the app (${when})`, !bar);
   }
 
@@ -117,6 +118,9 @@ const STATE = { goals: [plan('g1', 'GATE CSE', 'exam', 60), plan('g2', 'Amazon S
     const focus = (await device.shell('dumpsys window | grep -E "mCurrentFocus|mFocusedApp"')).toString();
     check('Google Play link opens outside the app', !focus.includes(`${PKG}/`) || /chrome|browser|vending/i.test(focus), focus.trim().split('\n')[0]);
     await shot('09-after-play-link');
+    // Back to the app, where it was left.
+    await device.shell(`monkey -p ${PKG} -c android.intent.category.LAUNCHER 1`);
+    await pause(2500);
 
     await page.evaluate(() => window.scrollTo(0, 0));
     await page.locator('.topbar button[aria-label="New plan"]').click();
