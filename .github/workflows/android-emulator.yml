@@ -9,6 +9,9 @@ on:
     paths: ['android/**', 'src/**', 'index.html', 'capacitor.config.ts', 'package*.json', '.github/**']
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 concurrency:
   group: emulator-${{ github.ref }}
   cancel-in-progress: true
@@ -61,3 +64,20 @@ jobs:
         with:
           name: emulator-screens-api${{ matrix.api-level }}
           path: emulator-screens
+      # Also keep the latest screenshots on the emulator-screens branch, so they
+      # can be viewed on GitHub without downloading a zip.
+      - name: Save screenshots to the emulator-screens branch
+        if: always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+        run: |
+          [ -d emulator-screens ] || exit 0
+          dir="api${{ matrix.api-level }}"
+          for i in 1 2 3 4; do
+            rm -rf "$RUNNER_TEMP/screens" && git clone -q --depth 1 --branch emulator-screens "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" "$RUNNER_TEMP/screens" 2>/dev/null \
+              || { mkdir -p "$RUNNER_TEMP/screens" && git -C "$RUNNER_TEMP/screens" init -q -b emulator-screens && git -C "$RUNNER_TEMP/screens" remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}"; }
+            cd "$RUNNER_TEMP/screens"
+            rm -rf "$dir" && mkdir -p "$dir" && cp "$GITHUB_WORKSPACE"/emulator-screens/* "$dir"/
+            git add -A
+            git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -q -m "Emulator screenshots, API ${{ matrix.api-level }}, ${GITHUB_SHA::7}" || exit 0
+            git push -q origin emulator-screens && exit 0
+            cd "$GITHUB_WORKSPACE"; sleep 5
+          done

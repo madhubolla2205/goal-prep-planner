@@ -41,7 +41,9 @@ const STATE = { goals: [plan('g1', 'GATE CSE', 'exam', 60), plan('g2', 'Amazon S
   async function noTitleBar(when) {
     await device.shell('uiautomator dump /sdcard/ui.xml');
     const xml = (await device.shell('cat /sdcard/ui.xml')).toString();
-    const bar = /action_bar|resource-id="android:id\/title"/.test(xml);
+    // AppCompat always has an "action_bar_root" container; a real title bar adds
+    // an action bar view or a native TextView with the app's name.
+    const bar = /:id\/(action_bar|action_bar_container|title)"/.test(xml) || /class="android.widget.TextView"[^>]*text="Goal Prep/.test(xml) || /text="Goal Prep[^"]*"[^>]*class="android.widget.TextView"/.test(xml);
     check(`no title bar above the app (${when})`, !bar);
   }
 
@@ -77,8 +79,11 @@ const STATE = { goals: [plan('g1', 'GATE CSE', 'exam', 60), plan('g2', 'Amazon S
     await noTitleBar('first run');
 
     // Three plans, as a tester would have after a few days.
+    // Reload in place: a force-stop right after writing can lose the write.
     await page.evaluate((s) => localStorage.setItem('goal-prep-planner/v1', JSON.stringify(s)), STATE);
-    page = await launch();
+    await page.reload();
+    await page.waitForSelector('.plan-card', { timeout: 30000 });
+    await pause(2500);
     await shot('02-home');
     await noTitleBar('home');
     await headerVisible(page, 'home');
@@ -118,7 +123,8 @@ const STATE = { goals: [plan('g1', 'GATE CSE', 'exam', 60), plan('g2', 'Amazon S
     await pause(1200);
     await shot('10-new-plan');
 
-    // Dark mode.
+    // Dark mode. Give storage time to reach disk before the app is stopped.
+    await pause(5000);
     await device.shell('cmd uimode night yes');
     await pause(2000);
     page = await launch();
