@@ -5,4 +5,5 @@ PASS  Feedback card links to Google Play  (https://play.google.com/store/apps/de
 PASS  Feedback button in the header (plan)  ({"top":0,"inset":"0px","btn":{"x":138.4761962890625,"y":62,"w":45.52381134033203,"h":34.9523811340332,"vw":412}})
 PASS  Feedback prompt on Today
 PASS  Feedback card on Adjust
+PASS  Google Play link opens outside the app  (mCurrentFocus=Window{a439b02 u0 com.android.chrome/org.chromium.chrome.browser.firstrun.FirstRunActivity})
 FAIL  checks ran to the end  (TimeoutError: locator.click: Timeout 30000ms exceeded.)
