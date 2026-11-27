@@ -1,5 +1,5 @@
 PASS  no title bar above the app (first run)
-FAIL  no title bar above the app (home)
+PASS  no title bar above the app (home)
 PASS  Feedback button in the header (home)  ({"top":0,"inset":"0px","btn":{"x":350.66668701171875,"y":18,"w":45.52381134033203,"h":34.9523811340332,"vw":412}})
 PASS  Feedback card links to Google Play  (https://play.google.com/store/apps/details?id=io.github.madhubolla2205.goalprep)
 PASS  Feedback button in the header (plan)  ({"top":0,"inset":"0px","btn":{"x":138.4761962890625,"y":62,"w":45.52381134033203,"h":34.9523811340332,"vw":412}})
